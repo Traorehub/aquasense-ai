@@ -2,9 +2,11 @@
 Entraînement baseline ML — Sprint 3 AquaSense AI (CPU).
 
 Usage:
-    python -m src.train
+    python -m src.train              # baselines + GridSearch
+    python -m src.train recall       # SMOTE + seuil calibré (recall needs repair)
+    python -m src.train final        # Sprint 5 : voting RF+XGB + arbitrage champion
 
-    from src.train import evaluate_model, train_baselines, load_training_data
+    from src.train import evaluate_model, train_baselines, train_recall_boost, train_sprint5_final
 """
 
 from __future__ import annotations
@@ -27,10 +29,14 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
+from sklearn.base import BaseEstimator, ClassifierMixin, clone as sk_clone
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_score, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder
 from sklearn.utils.class_weight import compute_sample_weight
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
 from xgboost import XGBClassifier
 
 from src.preprocessing import (
@@ -52,6 +58,192 @@ CLASS_ORDER = [
     "functional needs repair",
     "non functional",
 ]
+
+
+NEEDS_REPAIR_IDX = CLASS_ORDER.index(NEEDS_REPAIR)
+
+XGB_BEST_PARAMS = {
+    "clf__colsample_bytree": 0.8,
+    "clf__learning_rate": 0.1,
+    "clf__max_depth": 8,
+    "clf__subsample": 0.8,
+}
+
+RF_BEST_PARAMS = {
+    "clf__max_depth": None,
+    "clf__max_features": "sqrt",
+    "clf__min_samples_leaf": 1,
+}
+
+
+class ThresholdCalibratedClassifier(BaseEstimator, ClassifierMixin):
+    """Réduit le seuil de la classe « needs repair » pour augmenter le recall."""
+
+    def __init__(
+        self,
+        estimator: BaseEstimator | None = None,
+        target_class: str = NEEDS_REPAIR,
+        threshold: float = 0.25,
+    ):
+        self.estimator = estimator
+        self.target_class = target_class
+        self.threshold = threshold
+
+    def fit(self, X, y, **fit_params):
+        est = self.estimator if self.estimator is not None else _make_xgb_pipeline()
+        self.estimator_ = sk_clone(est) if hasattr(est, "get_params") else est
+        self.estimator_.fit(X, y, **fit_params)
+        self.threshold_ = self.threshold
+        self.target_idx_ = CLASS_ORDER.index(self.target_class)
+        return self
+
+    def predict(self, X):
+        proba = self.estimator_.predict_proba(X)
+        pred_idx = np.argmax(proba, axis=1)
+        mask = proba[:, self.target_idx_] >= self.threshold_
+        pred_idx[mask] = self.target_idx_
+        if hasattr(self.estimator_, "le_"):
+            return self.estimator_.le_.inverse_transform(pred_idx)
+        return np.array(CLASS_ORDER)[pred_idx]
+
+    def predict_proba(self, X):
+        return self.estimator_.predict_proba(X)
+
+    def calibrate_threshold(
+        self,
+        X_val: pd.DataFrame,
+        y_val: pd.Series,
+        min_recall: float = 0.65,
+    ) -> float:
+        proba = self.estimator_.predict_proba(X_val)
+        y_val_arr = np.asarray(y_val)
+        best_t = 0.33
+        best_score = -1.0
+        best_recall = 0.0
+
+        for t in np.arange(0.08, 0.55, 0.01):
+            pred_idx = np.argmax(proba, axis=1)
+            mask = proba[:, self.target_idx_] >= t
+            pred_idx[mask] = self.target_idx_
+            if hasattr(self.estimator_, "le_"):
+                y_pred = self.estimator_.le_.inverse_transform(pred_idx)
+            else:
+                y_pred = np.array(CLASS_ORDER)[pred_idx]
+
+            recall_nr = recall_score(
+                y_val_arr,
+                y_pred,
+                labels=CLASS_ORDER,
+                average=None,
+                zero_division=0,
+            )[self.target_idx_]
+            f1_m = f1_score(y_val_arr, y_pred, average="macro", labels=CLASS_ORDER, zero_division=0)
+            score = f1_m if recall_nr >= min_recall else recall_nr - 1.0
+
+            if score > best_score:
+                best_score = score
+                best_t = float(t)
+                best_recall = float(recall_nr)
+
+        self.threshold_ = best_t
+        return best_t
+
+    def get_params(self, deep=True):
+        return {
+            "estimator": self.estimator,
+            "target_class": self.target_class,
+            "threshold": self.threshold,
+        }
+
+    def set_params(self, **params):
+        for k, v in params.items():
+            setattr(self, k, v)
+        return self
+
+
+class SoftVotingEnsemble(BaseEstimator, ClassifierMixin):
+    """Moyenne des probabilités de plusieurs pipelines déjà entraînés."""
+
+    def __init__(self, estimators: list[Any] | None = None):
+        self.estimators = estimators
+
+    def fit(self, X, y):
+        self.estimators_ = list(self.estimators or [])
+        return self
+
+    @property
+    def classes_(self) -> np.ndarray:
+        return np.array(CLASS_ORDER)
+
+    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
+        probs = [np.asarray(est.predict_proba(X)) for est in self.estimators_]
+        return np.mean(probs, axis=0)
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        idx = np.argmax(self.predict_proba(X), axis=1)
+        return np.array(CLASS_ORDER)[idx]
+
+    def get_params(self, deep=True):
+        return {"estimators": self.estimators}
+
+    def set_params(self, **params):
+        for k, v in params.items():
+            setattr(self, k, v)
+        return self
+
+
+class XGBStringLabelPipeline(BaseEstimator, ClassifierMixin):
+    """Pipeline XGBoost : encode les labels string en entiers pour l'entraînement."""
+
+    def __init__(self, pipeline: Pipeline | None = None):
+        self.pipeline = pipeline
+
+    def _default_pipeline(self) -> Pipeline:
+        return Pipeline(
+            [
+                ("prep", build_encoder("none")),
+                (
+                    "clf",
+                    XGBClassifier(
+                        n_estimators=300,
+                        objective="multi:softprob",
+                        eval_metric="mlogloss",
+                        random_state=RANDOM_STATE,
+                        n_jobs=-1,
+                        verbosity=0,
+                    ),
+                ),
+            ]
+        )
+
+    def fit(self, X, y, **fit_params):
+        self.le_ = LabelEncoder()
+        self.le_.fit(CLASS_ORDER)
+        pipe = self.pipeline if self.pipeline is not None else self._default_pipeline()
+        pipe.fit(X, self.le_.transform(y), **fit_params)
+        self.pipeline = pipe
+        return self
+
+    def predict(self, X):
+        return self.le_.inverse_transform(self.pipeline.predict(X))
+
+    def predict_proba(self, X):
+        return self.pipeline.predict_proba(X)
+
+    def get_params(self, deep=True):
+        pipe = self.pipeline if self.pipeline is not None else self._default_pipeline()
+        if not deep:
+            return {"pipeline": pipe}
+        return pipe.get_params(deep=True)
+
+    def set_params(self, **params):
+        if set(params) == {"pipeline"}:
+            self.pipeline = params["pipeline"]
+            return self
+        pipe = self.pipeline if self.pipeline is not None else self._default_pipeline()
+        pipe.set_params(**params)
+        self.pipeline = pipe
+        return self
 
 
 def load_training_data() -> pd.DataFrame:
@@ -158,8 +350,10 @@ def _make_lr_pipeline() -> Pipeline:
             (
                 "clf",
                 LogisticRegression(
-                    max_iter=1000,
+                    max_iter=5000,
+                    tol=1e-3,
                     class_weight="balanced",
+                    solver="saga",
                     random_state=RANDOM_STATE,
                 ),
             ),
@@ -193,31 +387,16 @@ def _make_rf_pipeline() -> Pipeline:
     )
 
 
-def _make_xgb_pipeline() -> Pipeline:
-    return Pipeline(
-        [
-            ("prep", build_encoder("none")),
-            (
-                "clf",
-                XGBClassifier(
-                    n_estimators=300,
-                    objective="multi:softprob",
-                    eval_metric="mlogloss",
-                    random_state=RANDOM_STATE,
-                    n_jobs=-1,
-                    verbosity=0,
-                ),
-            ),
-        ]
-    )
+def _make_xgb_pipeline() -> XGBStringLabelPipeline:
+    return XGBStringLabelPipeline()
 
 
 def _fit_pipeline(
-    pipeline: Pipeline,
+    pipeline: Any,
     X_train: pd.DataFrame,
     y_train: pd.Series,
     model_name: str,
-) -> Pipeline:
+) -> Any:
     if model_name == "xgboost":
         sw = compute_sample_weight(class_weight="balanced", y=y_train)
         pipeline.fit(X_train, y_train, clf__sample_weight=sw)
@@ -226,7 +405,7 @@ def _fit_pipeline(
     return pipeline
 
 
-def _cross_val_f1(pipeline: Pipeline, X: pd.DataFrame, y: pd.Series, model_name: str) -> dict[str, float]:
+def _cross_val_f1(X: pd.DataFrame, y: pd.Series, model_name: str) -> dict[str, float]:
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     if model_name == "xgboost":
         # CV manuelle avec sample weights pour XGB
@@ -256,7 +435,7 @@ def _cross_val_f1(pipeline: Pipeline, X: pd.DataFrame, y: pd.Series, model_name:
     return {"mean": float(arr.mean()), "std": float(arr.std())}
 
 
-def _clone_pipeline(model_name: str) -> Pipeline:
+def _clone_pipeline(model_name: str) -> Any:
     builders = {
         "logistic_regression": _make_lr_pipeline,
         "knn": _make_knn_pipeline,
@@ -286,7 +465,7 @@ def tune_random_forest(X_train: pd.DataFrame, y_train: pd.Series) -> GridSearchC
 
 
 def tune_xgboost(X_train: pd.DataFrame, y_train: pd.Series) -> GridSearchCV:
-    pipe = _make_xgb_pipeline()
+    pipe = XGBStringLabelPipeline()
     sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
     param_grid = {
         "clf__learning_rate": [0.05, 0.1],
@@ -304,6 +483,180 @@ def tune_xgboost(X_train: pd.DataFrame, y_train: pd.Series) -> GridSearchCV:
     )
     grid.fit(X_train, y_train, clf__sample_weight=sample_weight)
     return grid
+
+
+def _make_xgb_tuned_pipeline() -> XGBStringLabelPipeline:
+    pipe = XGBStringLabelPipeline()
+    pipe.set_params(**XGB_BEST_PARAMS)
+    return pipe
+
+
+def _make_rf_tuned_pipeline() -> Pipeline:
+    pipe = _make_rf_pipeline()
+    pipe.set_params(**RF_BEST_PARAMS)
+    return pipe
+
+
+def _make_rf_smote_pipeline() -> ImbPipeline:
+    pipe = ImbPipeline(
+        [
+            ("prep", build_encoder("none")),
+            ("smote", SMOTE(random_state=RANDOM_STATE, k_neighbors=5)),
+            (
+                "clf",
+                RandomForestClassifier(
+                    n_estimators=200,
+                    random_state=RANDOM_STATE,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
+    pipe.set_params(**RF_BEST_PARAMS)
+    return pipe
+
+
+def _make_xgb_smote_pipeline() -> XGBStringLabelPipeline:
+    inner = ImbPipeline(
+        [
+            ("prep", build_encoder("none")),
+            ("smote", SMOTE(random_state=RANDOM_STATE, k_neighbors=5)),
+            (
+                "clf",
+                XGBClassifier(
+                    n_estimators=300,
+                    objective="multi:softprob",
+                    eval_metric="mlogloss",
+                    random_state=RANDOM_STATE,
+                    n_jobs=-1,
+                    verbosity=0,
+                ),
+            ),
+        ]
+    )
+    inner.set_params(**XGB_BEST_PARAMS)
+    return XGBStringLabelPipeline(inner)
+
+
+def train_recall_boost(
+    save: bool = True,
+    min_recall: float = 0.65,
+) -> dict[str, Any]:
+    """
+    Passe d'amélioration recall « needs repair » : seuil calibré ± SMOTE.
+
+    Usage:
+        python -m src.train recall
+    """
+    df = load_training_data()
+    X, y = get_feature_matrix(df)
+    X_train, X_test, y_train, y_test = stratified_split(X, y)
+    X_fit, X_cal, y_fit, y_cal = train_test_split(
+        X_train,
+        y_train,
+        test_size=0.2,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
+    )
+
+    candidates: list[tuple[str, Any, dict[str, Any]]] = [
+        ("xgboost_threshold", _make_xgb_tuned_pipeline, {"clf__sample_weight": compute_sample_weight("balanced", y_fit)}),
+        ("xgboost_smote", _make_xgb_smote_pipeline, {}),
+        ("xgboost_smote_threshold", _make_xgb_smote_pipeline, {}),
+        ("random_forest_smote", _make_rf_smote_pipeline, {}),
+        ("random_forest_smote_threshold", _make_rf_smote_pipeline, {}),
+    ]
+
+    results: dict[str, Any] = {
+        "min_recall_target": min_recall,
+        "calibration_split": {"fit": len(X_fit), "cal": len(X_cal), "test": len(X_test)},
+        "imbalance_strategy": "SMOTE (k=5) après encodage + seuil calibré sur hold-out 20 % du train",
+        "models": {},
+    }
+    trained: dict[str, Any] = {}
+
+    for name, factory, fit_kwargs in candidates:
+        print(f"\n=== Recall boost : {name} ===")
+        base = factory()
+        use_threshold = name.endswith("_threshold")
+
+        if use_threshold:
+            model: Any = ThresholdCalibratedClassifier(estimator=base)
+            model.fit(X_fit, y_fit, **fit_kwargs)
+            threshold = model.calibrate_threshold(X_cal, y_cal, min_recall=min_recall)
+            print(f"  Seuil needs repair calibré : {threshold:.2f}")
+        else:
+            model = base
+            model.fit(X_fit, y_fit, **fit_kwargs)
+            threshold = None
+
+        metrics = evaluate_model(model, X_test, y_test)
+        trained[name] = model
+        entry: dict[str, Any] = {"metrics": metrics, "threshold": threshold}
+        results["models"][name] = entry
+        print(
+            f"  F1-Macro={metrics['f1_macro']:.4f} | "
+            f"Recall needs repair={metrics['recall_per_class'].get(NEEDS_REPAIR, 0):.4f}"
+        )
+
+    comparison = []
+    for name, info in results["models"].items():
+        m = info["metrics"]
+        comparison.append(
+            {
+                "model": name,
+                "f1_macro": m["f1_macro"],
+                "recall_needs_repair": m["recall_per_class"].get(NEEDS_REPAIR, 0),
+                "f1_needs_repair": m["f1_per_class"].get(NEEDS_REPAIR, 0),
+                "threshold": info.get("threshold"),
+            }
+        )
+    comparison_df = pd.DataFrame(comparison).sort_values(
+        ["recall_needs_repair", "f1_macro"], ascending=False
+    )
+    results["comparison"] = comparison_df.to_dict(orient="records")
+    champion_row = comparison_df.iloc[0]
+    results["champion"] = champion_row["model"]
+    best_recall = float(champion_row["recall_needs_repair"])
+
+    print(
+        f"\n=== Champion recall : {results['champion']} "
+        f"(Recall needs repair={best_recall:.4f}) ==="
+    )
+    print(
+        f"Critère recall ≥ {min_recall} : "
+        f"{'OK' if best_recall >= min_recall else 'NON'} ({best_recall:.4f})"
+    )
+
+    if save:
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        champ = results["champion"]
+        joblib.dump(trained[champ], MODELS_DIR / "champion_recall_v1.joblib")
+        joblib.dump(trained["xgboost_smote_threshold"], MODELS_DIR / "xgb_smote_threshold_v1.joblib")
+        out = REPORTS_DIR / "sprint_03_recall_boost.json"
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2, ensure_ascii=False)
+        comparison_df.to_csv(REPORTS_DIR / "sprint_03_recall_boost.csv", index=False)
+        print(f"Métriques → {out}")
+        print(f"Modèle champion → {MODELS_DIR / 'champion_recall_v1.joblib'}")
+
+    results["trained_models"] = trained
+    results["X_test"] = X_test
+    results["y_test"] = y_test
+    return results
+
+
+def get_pipeline_prep_clf(pipe: Any) -> tuple[Any, Any]:
+    """Extrait prep et clf depuis Pipeline sklearn ou XGBStringLabelPipeline."""
+    if hasattr(pipe, "named_steps"):
+        return pipe.named_steps["prep"], pipe.named_steps["clf"]
+    inner = getattr(pipe, "pipeline", None) or getattr(pipe, "estimator_", None)
+    if inner is not None and hasattr(inner, "named_steps"):
+        return inner.named_steps["prep"], inner.named_steps["clf"]
+    if inner is not None and hasattr(inner, "pipeline") and hasattr(inner.pipeline, "named_steps"):
+        return inner.pipeline.named_steps["prep"], inner.pipeline.named_steps["clf"]
+    raise AttributeError(f"Impossible d'extraire prep/clf depuis {type(pipe).__name__}")
 
 
 def get_encoded_feature_names(prep) -> list[str]:
@@ -441,7 +794,210 @@ def train_baselines(
     return results
 
 
+def _load_json_report(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _metrics_row(model: str, m: dict[str, Any], model_type: str = "ML") -> dict[str, Any]:
+    f1_pc = m.get("f1_per_class") or {}
+    rec_pc = m.get("recall_per_class") or {}
+    if isinstance(f1_pc, dict):
+        f1_nr = f1_pc.get(NEEDS_REPAIR, m.get("f1_needs_repair", 0))
+        rec_nr = rec_pc.get(NEEDS_REPAIR, m.get("recall_needs_repair", 0))
+    else:
+        f1_nr = m.get("f1_needs_repair", 0)
+        rec_nr = m.get("recall_needs_repair", 0)
+    return {
+        "model": model,
+        "type": model_type,
+        "f1_macro": m.get("f1_macro", 0),
+        "f1_needs_repair": f1_nr,
+        "recall_needs_repair": rec_nr,
+        "accuracy": m.get("accuracy", 0),
+        "roc_auc": m.get("roc_auc_macro_ovr"),
+        "latency_ms": m.get("latency_ms_per_sample"),
+    }
+
+
+def _build_historical_comparison_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+
+    s3 = _load_json_report(REPORTS_DIR / "sprint_03_metrics.json")
+    for name, info in s3.get("models", {}).items():
+        rows.append(_metrics_row(name, info.get("metrics", {}), "ML"))
+
+    recall = _load_json_report(REPORTS_DIR / "sprint_03_recall_boost.json")
+    for name, info in recall.get("models", {}).items():
+        rows.append(_metrics_row(f"{name}_recall_boost", info.get("metrics", {}), "ML"))
+
+    s4 = _load_json_report(REPORTS_DIR / "sprint_04_metrics.json")
+    for name, info in s4.get("models", {}).items():
+        if "metrics" in info:
+            rows.append(_metrics_row(name, info["metrics"], "DL"))
+
+    return rows
+
+
+def train_sprint5_final(save: bool = True) -> dict[str, Any]:
+    """
+    Sprint 5 — voting RF+XGB, arbitrage champion, tableau ML+DL.
+
+    Usage:
+        python -m src.train final
+    """
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    df = load_training_data()
+    X, y = get_feature_matrix(df)
+    X_train, X_test, y_train, y_test = stratified_split(X, y)
+
+    X_fit, X_cal, y_fit, y_cal = train_test_split(
+        X_train,
+        y_train,
+        test_size=0.2,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
+    )
+
+    print("\n=== Sprint 5 — entraînement modèles clés (params S3) ===")
+
+    print("  Random Forest tuned...")
+    rf = _make_rf_tuned_pipeline()
+    rf.fit(X_train, y_train)
+    rf_metrics = evaluate_model(rf, X_test, y_test)
+
+    print("  XGBoost tuned...")
+    xgb = _make_xgb_tuned_pipeline()
+    sw = compute_sample_weight(class_weight="balanced", y=y_train)
+    xgb.fit(X_train, y_train, clf__sample_weight=sw)
+    xgb_metrics = evaluate_model(xgb, X_test, y_test)
+
+    print("  Recall champion (XGB SMOTE + seuil)...")
+    recall_est = ThresholdCalibratedClassifier(estimator=_make_xgb_smote_pipeline())
+    recall_est.fit(X_fit, y_fit)
+    threshold = recall_est.calibrate_threshold(X_cal, y_cal, min_recall=0.65)
+    recall_metrics = evaluate_model(recall_est, X_test, y_test)
+    print(f"    Seuil calibré : {threshold:.2f}")
+
+    print("  Soft Voting RF + XGB...")
+    voting = SoftVotingEnsemble(estimators=[rf, xgb])
+    voting.fit(X_train, y_train)
+    voting_metrics = evaluate_model(voting, X_test, y_test)
+
+    print(
+        f"  RF F1={rf_metrics['f1_macro']:.4f} | "
+        f"XGB F1={xgb_metrics['f1_macro']:.4f} | "
+        f"Voting F1={voting_metrics['f1_macro']:.4f} | "
+        f"Recall champ F1={recall_metrics['f1_macro']:.4f} "
+        f"(recall NR={recall_metrics['recall_needs_repair']:.4f})"
+    )
+
+    sprint5_models = {
+        "random_forest_tuned": {"metrics": rf_metrics},
+        "xgboost_tuned": {"metrics": xgb_metrics},
+        "voting_rf_xgb_soft": {"metrics": voting_metrics},
+        "xgboost_smote_threshold": {"metrics": recall_metrics, "threshold": threshold},
+    }
+
+    rows = _build_historical_comparison_rows()
+    for name, info in sprint5_models.items():
+        rows.append(_metrics_row(name, info["metrics"], "ML"))
+
+    comparison_df = pd.DataFrame(rows).drop_duplicates(subset=["model"], keep="last")
+    comparison_df = comparison_df.sort_values("f1_macro", ascending=False)
+
+    # Arbitrage
+    f1_champion = max(
+        [
+            ("random_forest_tuned", rf_metrics["f1_macro"]),
+            ("xgboost_tuned", xgb_metrics["f1_macro"]),
+            ("voting_rf_xgb_soft", voting_metrics["f1_macro"]),
+        ],
+        key=lambda x: x[1],
+    )
+    recall_champion = ("xgboost_smote_threshold", recall_metrics["recall_needs_repair"])
+
+    production_f1 = f1_champion[0]
+    production_recall = recall_champion[0]
+
+    if voting_metrics["f1_macro"] >= rf_metrics["f1_macro"]:
+        recommendation = (
+            "Voting RF+XGB égale ou bat le RF seul sur F1 — "
+            "déploiement dashboard : recall champion pour alertes, voting ou RF pour F1."
+        )
+    else:
+        recommendation = (
+            "Voting n'améliore pas le RF — champion F1 = RF tuned. "
+            "Déploiement Maroc (alertes needs repair) = XGB SMOTE+seuil."
+        )
+
+    results: dict[str, Any] = {
+        "split": {"train": len(X_train), "test": len(X_test)},
+        "sprint5_models": sprint5_models,
+        "champions": {
+            "f1_macro": {"model": production_f1, "score": f1_champion[1]},
+            "recall_needs_repair": {"model": production_recall, "score": recall_champion[1]},
+            "production_dashboard_alerts": production_recall,
+            "production_analytics_f1": production_f1,
+        },
+        "criteria": {
+            "f1_macro_target_0_72": {
+                "met": f1_champion[1] >= 0.72,
+                "best": f1_champion[1],
+            },
+            "recall_needs_repair_target_0_65": {
+                "met": recall_champion[1] >= 0.65,
+                "best": recall_champion[1],
+            },
+        },
+        "dl_verdict": "DL max F1 ~0.54 (S4) — non retenu pour production",
+        "recommendation": recommendation,
+        "comparison": comparison_df.to_dict(orient="records"),
+    }
+
+    print(f"\n=== Champion F1-Macro : {production_f1} ({f1_champion[1]:.4f}) ===")
+    print(f"=== Champion recall métier : {production_recall} ({recall_champion[1]:.4f}) ===")
+    print(f"\n{recommendation}")
+
+    if save:
+        joblib.dump(rf, MODELS_DIR / "rf_best_v1.joblib")
+        joblib.dump(xgb, MODELS_DIR / "xgb_best_v1.joblib")
+        joblib.dump(voting, MODELS_DIR / "voting_rf_xgb_v1.joblib")
+        joblib.dump(recall_est, MODELS_DIR / "champion_recall_v1.joblib")
+        joblib.dump(rf, MODELS_DIR / "champion_ml_v1.joblib")
+        joblib.dump(recall_est, MODELS_DIR / "champion_production_v1.joblib")
+
+        with open(REPORTS_DIR / "sprint_05_metrics.json", "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2, ensure_ascii=False)
+        comparison_df.to_csv(REPORTS_DIR / "sprint_05_final_comparison.csv", index=False)
+
+        print(f"\nMetriques -> {REPORTS_DIR / 'sprint_05_metrics.json'}")
+        print(f"Tableau  -> {REPORTS_DIR / 'sprint_05_final_comparison.csv'}")
+        print(f"Modeles  -> {MODELS_DIR}")
+
+    results["trained"] = {
+        "rf": rf,
+        "xgb": xgb,
+        "voting": voting,
+        "recall": recall_est,
+    }
+    return results
+
+
 def main() -> None:
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "recall":
+        train_recall_boost(save=True)
+        return
+
+    if len(sys.argv) > 1 and sys.argv[1] == "final":
+        train_sprint5_final(save=True)
+        return
+
     results = train_baselines(tune=True, save=True)
     champ = results["champion"]
     f1 = results["models"][champ]["metrics"]["f1_macro"]
