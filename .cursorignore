@@ -1,0 +1,39 @@
+﻿# Données brutes et nettoyées (volumineuses, inutiles pour l'indexation)
+data/raw/
+data/cleaned/
+
+# Environnement virtuel
+.venv/
+venv/
+env/
+
+# Modèles entraînés (binaires lourds)
+models/*.joblib
+models/*.keras
+models/*.h5
+models/*.tflite
+models/*.pkl
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Rapports générés
+reports/*.pdf
+reports/*.pptx
+
+# Logs et bases de données
+*.log
+*.sqlite
+*.db
+
+# TensorFlow events
+*.tfevents.*
+
+# pytest cache
+.pytest_cache/
+htmlcov/
+.coverage

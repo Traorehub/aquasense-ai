@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Data (raw files are large — download via scripts/download_data.py)
+data/raw/
+data/cleaned/*.csv
+
+# Models (heavy binary files)
+models/*.joblib
+models/*.keras
+models/*.h5
+models/*.tflite
+models/*.pkl
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+credentials.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & databases
+*.log
+*.sqlite
+*.db
+
+# Reports generated
+reports/*.pdf
+reports/*.pptx
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# TensorFlow
+*.tfevents.*
