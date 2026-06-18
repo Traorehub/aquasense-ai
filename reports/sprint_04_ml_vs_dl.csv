@@ -1,0 +1,9 @@
+model,type,f1_macro,f1_needs_repair,recall_needs_repair,accuracy,sprint
+random_forest_tuned,ML,0.6658,0.4250,0.4844,0.7586,S3
+xgboost_tuned,ML,0.6570,0.4337,0.6419,0.7343,S3
+xgboost_smote_threshold,ML,0.6289,0.4077,0.6952,0.7143,S3
+mlp_l2_0.001,DL,0.5410,0.3113,0.6025,0.6099,S4
+mlp_baseline,DL,0.5297,0.2992,0.5666,0.6038,S4
+residual_mlp,DL,0.5276,0.2743,0.3024,0.6341,S4
+cnn1d,DL,0.4113,0.1726,0.2260,0.5067,S4
+mlp_tuned_grid,DL,0.3817,0.2065,0.9305,0.3803,S4

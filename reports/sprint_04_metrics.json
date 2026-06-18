@@ -1,0 +1,121 @@
+{
+  "runtime": {
+    "platform": "Google Colab",
+    "gpu": "NVIDIA T4",
+    "numpy": "2.0.2",
+    "tensorflow": "2.20.0",
+    "notebooks": [
+      "notebooks/04_dl_mlp_colab_run.ipynb",
+      "result/05_dl_colab_tune.ipynb"
+    ],
+    "command": "python -m src.train_dl tune"
+  },
+  "split": {
+    "train": 47520,
+    "test": 11880,
+    "random_state": 42
+  },
+  "input_dim": 64,
+  "imbalance_strategy": "class_weight inverse frequency (needs repair x4.59) + sample_weight en grid search",
+  "runs": {
+    "mlp_baseline_run1": {
+      "description": "Premier run Colab — notebook Untitled5 / 04_dl_mlp",
+      "metrics": {
+        "f1_macro": 0.5297,
+        "f1_needs_repair": 0.3008,
+        "recall_needs_repair": 0.6037,
+        "accuracy": 0.595
+      }
+    },
+    "full_tune_run2": {
+      "description": "Run complet train_dl tune — notebook 05_dl_colab_tune",
+      "architectures_evaluated": 6,
+      "grid_search_combinations": 9
+    }
+  },
+  "models": {
+    "mlp_l2_0.001": {
+      "metrics": {
+        "f1_macro": 0.541,
+        "f1_needs_repair": 0.3113,
+        "recall_needs_repair": 0.6025,
+        "accuracy": 0.6099
+      },
+      "note": "Meilleur F1-Macro DL observe"
+    },
+    "mlp_baseline": {
+      "metrics": {
+        "f1_macro": 0.5297,
+        "f1_needs_repair": 0.2992,
+        "recall_needs_repair": 0.5666,
+        "accuracy": 0.6038
+      },
+      "artifact": "models/mlp_best_v1.keras",
+      "note": "Champion selectionne par train_dl (critere F1-Macro)"
+    },
+    "residual_mlp": {
+      "metrics": {
+        "f1_macro": 0.5276,
+        "f1_needs_repair": 0.2743,
+        "recall_needs_repair": 0.3024,
+        "accuracy": 0.6341
+      },
+      "artifact": "models/residual_mlp_v1.keras"
+    },
+    "mlp_l2_0.0": {
+      "metrics": {
+        "f1_macro": 0.5272,
+        "f1_needs_repair": 0.2973,
+        "recall_needs_repair": 0.5747,
+        "accuracy": 0.5984
+      }
+    },
+    "cnn1d": {
+      "metrics": {
+        "f1_macro": 0.4113,
+        "f1_needs_repair": 0.1726,
+        "recall_needs_repair": 0.226,
+        "accuracy": 0.5067
+      },
+      "artifact": "models/cnn1d_v1.keras"
+    },
+    "mlp_tuned": {
+      "hyperparams": {
+        "dropout": 0.2,
+        "lr": 0.001,
+        "l2_reg": 0.001,
+        "sample_weight": true
+      },
+      "metrics": {
+        "f1_macro": 0.3817,
+        "f1_needs_repair": 0.2065,
+        "recall_needs_repair": 0.9305,
+        "accuracy": 0.3803
+      },
+      "artifact": "models/mlp_tuned_best_v1.keras",
+      "note": "Recall artificiellement eleve — modele non deployable (sur-prediction needs repair)"
+    }
+  },
+  "grid_search": [
+    {"dropout": 0.2, "lr": 0.01, "f1_macro": 0.2992, "recall_needs_repair": 0.8876},
+    {"dropout": 0.2, "lr": 0.001, "f1_macro": 0.3817, "recall_needs_repair": 0.9305},
+    {"dropout": 0.2, "lr": 0.0001, "f1_macro": 0.0991, "recall_needs_repair": 0.9722},
+    {"dropout": 0.3, "lr": 0.01, "f1_macro": 0.2526, "recall_needs_repair": 0.9374},
+    {"dropout": 0.3, "lr": 0.001, "f1_macro": 0.3767, "recall_needs_repair": 0.8563},
+    {"dropout": 0.3, "lr": 0.0001, "f1_macro": 0.2507, "recall_needs_repair": 0.4936},
+    {"dropout": 0.5, "lr": 0.01, "f1_macro": 0.1948, "recall_needs_repair": 0.9224},
+    {"dropout": 0.5, "lr": 0.001, "f1_macro": 0.2946, "recall_needs_repair": 0.9502},
+    {"dropout": 0.5, "lr": 0.0001, "f1_macro": 0.0696, "recall_needs_repair": 0.9815}
+  ],
+  "comparison_ml_s3": {
+    "random_forest_tuned_f1_macro": 0.6658,
+    "xgboost_smote_threshold_recall_needs_repair": 0.6952,
+    "best_dl_f1_macro": 0.541,
+    "best_dl_vs_rf_delta": -0.1248
+  },
+  "champion_dl": "mlp_baseline",
+  "best_dl_f1": "mlp_l2_0.001",
+  "status": "completed",
+  "verdict": "DL ne surpasse pas le ML — arbitrage champion reporte au Sprint 5 (ML retenu)",
+  "next_sprint": "S5 — Voting RF+XGB, model_card.md"
+}

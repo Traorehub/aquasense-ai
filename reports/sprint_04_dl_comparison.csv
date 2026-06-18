@@ -1,0 +1,7 @@
+architecture,f1_macro,f1_needs_repair,recall_needs_repair,accuracy,deployable
+mlp_l2_0.001,0.5410,0.3113,0.6025,0.6099,yes
+mlp_baseline,0.5297,0.2992,0.5666,0.6038,yes
+residual_mlp,0.5276,0.2743,0.3024,0.6341,yes
+mlp_l2_0.0,0.5272,0.2973,0.5747,0.5984,yes
+cnn1d,0.4113,0.1726,0.2260,0.5067,yes
+mlp_tuned_grid,0.3817,0.2065,0.9305,0.3803,no
