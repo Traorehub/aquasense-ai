@@ -1,0 +1,244 @@
+{
+  "min_recall_target": 0.65,
+  "calibration_split": {
+    "fit": 38016,
+    "cal": 9504,
+    "test": 11880
+  },
+  "imbalance_strategy": "SMOTE (k=5) après encodage + seuil calibré sur hold-out 20 % du train",
+  "models": {
+    "xgboost_threshold": {
+      "metrics": {
+        "f1_macro": 0.6391954064967149,
+        "f1_per_class": {
+          "functional": 0.7612605180663257,
+          "functional needs repair": 0.40774647887323945,
+          "non functional": 0.7485792225505796
+        },
+        "recall_per_class": {
+          "functional": 0.7151270923744575,
+          "functional needs repair": 0.6709154113557358,
+          "non functional": 0.7213581599123767
+        },
+        "recall_needs_repair": 0.6709154113557358,
+        "accuracy": 0.7143097643097643,
+        "roc_auc_macro_ovr": 0.870861949535939,
+        "confusion_matrix": [
+          [
+            4614,
+            1001,
+            837
+          ],
+          [
+            181,
+            579,
+            103
+          ],
+          [
+            875,
+            397,
+            3293
+          ]
+        ],
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.72      0.76      6452\nfunctional needs repair       0.29      0.67      0.41       863\n         non functional       0.78      0.72      0.75      4565\n\n               accuracy                           0.71     11880\n              macro avg       0.63      0.70      0.64     11880\n           weighted avg       0.76      0.71      0.73     11880\n",
+        "latency_ms_per_sample": 0.008557062289463544,
+        "n_test": 11880
+      },
+      "threshold": 0.3399999999999999
+    },
+    "xgboost_smote": {
+      "metrics": {
+        "f1_macro": 0.653761218484842,
+        "f1_per_class": {
+          "functional": 0.7973300970873787,
+          "functional needs repair": 0.41711229946524064,
+          "non functional": 0.7468412589019068
+        },
+        "recall_per_class": {
+          "functional": 0.8146311221326721,
+          "functional needs repair": 0.4519119351100811,
+          "non functional": 0.712157721796276
+        },
+        "recall_needs_repair": 0.4519119351100811,
+        "accuracy": 0.7489057239057239,
+        "roc_auc_macro_ovr": 0.8694516251657879,
+        "confusion_matrix": [
+          [
+            5256,
+            438,
+            758
+          ],
+          [
+            341,
+            390,
+            132
+          ],
+          [
+            1135,
+            179,
+            3251
+          ]
+        ],
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.78      0.81      0.80      6452\nfunctional needs repair       0.39      0.45      0.42       863\n         non functional       0.79      0.71      0.75      4565\n\n               accuracy                           0.75     11880\n              macro avg       0.65      0.66      0.65     11880\n           weighted avg       0.75      0.75      0.75     11880\n",
+        "latency_ms_per_sample": 0.015903939392557995,
+        "n_test": 11880
+      },
+      "threshold": null
+    },
+    "xgboost_smote_threshold": {
+      "metrics": {
+        "f1_macro": 0.6288677769579619,
+        "f1_per_class": {
+          "functional": 0.7584077985377742,
+          "functional needs repair": 0.39267015706806285,
+          "non functional": 0.7355253752680486
+        },
+        "recall_per_class": {
+          "functional": 0.7234965902045877,
+          "functional needs repair": 0.6952491309385863,
+          "non functional": 0.6762322015334064
+        },
+        "recall_needs_repair": 0.6952491309385863,
+        "accuracy": 0.7032828282828283,
+        "roc_auc_macro_ovr": 0.8694516251657879,
+        "confusion_matrix": [
+          [
+            4668,
+            1114,
+            670
+          ],
+          [
+            191,
+            600,
+            72
+          ],
+          [
+            999,
+            479,
+            3087
+          ]
+        ],
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.80      0.72      0.76      6452\nfunctional needs repair       0.27      0.70      0.39       863\n         non functional       0.81      0.68      0.74      4565\n\n               accuracy                           0.70     11880\n              macro avg       0.63      0.70      0.63     11880\n           weighted avg       0.76      0.70      0.72     11880\n",
+        "latency_ms_per_sample": 0.008875151516721498,
+        "n_test": 11880
+      },
+      "threshold": 0.15999999999999998
+    },
+    "random_forest_smote": {
+      "metrics": {
+        "f1_macro": 0.6511399438077695,
+        "f1_per_class": {
+          "functional": 0.8018658713772272,
+          "functional needs repair": 0.3947065592635213,
+          "non functional": 0.7568474007825601
+        },
+        "recall_per_class": {
+          "functional": 0.8126162430254185,
+          "functional needs repair": 0.39745075318655854,
+          "non functional": 0.7415115005476451
+        },
+        "recall_needs_repair": 0.39745075318655854,
+        "accuracy": 0.7551346801346801,
+        "roc_auc_macro_ovr": 0.8634494433560761,
+        "confusion_matrix": [
+          [
+            5243,
+            373,
+            836
+          ],
+          [
+            361,
+            343,
+            159
+          ],
+          [
+            1021,
+            159,
+            3385
+          ]
+        ],
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.79      0.81      0.80      6452\nfunctional needs repair       0.39      0.40      0.39       863\n         non functional       0.77      0.74      0.76      4565\n\n               accuracy                           0.76     11880\n              macro avg       0.65      0.65      0.65     11880\n           weighted avg       0.76      0.76      0.75     11880\n",
+        "latency_ms_per_sample": 0.021726767676478714,
+        "n_test": 11880
+      },
+      "threshold": null
+    },
+    "random_forest_smote_threshold": {
+      "metrics": {
+        "f1_macro": 0.631661510478059,
+        "f1_per_class": {
+          "functional": 0.7661171862249061,
+          "functional needs repair": 0.38456237077877325,
+          "non functional": 0.7443049744304975
+        },
+        "recall_per_class": {
+          "functional": 0.7275263484190948,
+          "functional needs repair": 0.6465816917728853,
+          "non functional": 0.7014238773274918
+        },
+        "recall_needs_repair": 0.6465816917728853,
+        "accuracy": 0.7116161616161616,
+        "roc_auc_macro_ovr": 0.8634494982578431,
+        "confusion_matrix": [
+          [
+            4694,
+            1020,
+            738
+          ],
+          [
+            206,
+            558,
+            99
+          ],
+          [
+            902,
+            461,
+            3202
+          ]
+        ],
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.73      0.77      6452\nfunctional needs repair       0.27      0.65      0.38       863\n         non functional       0.79      0.70      0.74      4565\n\n               accuracy                           0.71     11880\n              macro avg       0.63      0.69      0.63     11880\n           weighted avg       0.76      0.71      0.73     11880\n",
+        "latency_ms_per_sample": 0.01812182659944143,
+        "n_test": 11880
+      },
+      "threshold": 0.15999999999999998
+    }
+  },
+  "comparison": [
+    {
+      "model": "xgboost_smote_threshold",
+      "f1_macro": 0.6288677769579619,
+      "recall_needs_repair": 0.6952491309385863,
+      "f1_needs_repair": 0.39267015706806285,
+      "threshold": 0.15999999999999998
+    },
+    {
+      "model": "xgboost_threshold",
+      "f1_macro": 0.6391954064967149,
+      "recall_needs_repair": 0.6709154113557358,
+      "f1_needs_repair": 0.40774647887323945,
+      "threshold": 0.3399999999999999
+    },
+    {
+      "model": "random_forest_smote_threshold",
+      "f1_macro": 0.631661510478059,
+      "recall_needs_repair": 0.6465816917728853,
+      "f1_needs_repair": 0.38456237077877325,
+      "threshold": 0.15999999999999998
+    },
+    {
+      "model": "xgboost_smote",
+      "f1_macro": 0.653761218484842,
+      "recall_needs_repair": 0.4519119351100811,
+      "f1_needs_repair": 0.41711229946524064,
+      "threshold": NaN
+    },
+    {
+      "model": "random_forest_smote",
+      "f1_macro": 0.6511399438077695,
+      "recall_needs_repair": 0.39745075318655854,
+      "f1_needs_repair": 0.3947065592635213,
+      "threshold": NaN
+    }
+  ],
+  "champion": "xgboost_smote_threshold"
+}
