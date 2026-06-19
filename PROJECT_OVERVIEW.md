@@ -94,7 +94,7 @@ AquaSense_AI/
 | **S6** | Simulation IoT MQTT | 2j | ✅ Terminé | Mosquitto Windows + simulator + consumer + SQLite |
 | **S7** | Dashboard Streamlit (vue Maroc) | 2–3j | ✅ Terminé | `dashboard/app.py` — KPIs, carte, alertes, auto-refresh |
 | **S8** | Tests simulation | 2j | ✅ Terminé | pytest 37/37 — offline + intégration MQTT |
-| **S9** | Rapport & Livrables | 1–2j | ⬜ À faire | PDF, section choix dataset Maroc |
+| **S9** | Rapport & Livrables | 1–2j | 🟡 En cours | `AquaSense_AI_Report.md` rédigé · PDF à exporter |
 
 **Légende :** ⬜ À faire · 🟡 En cours · ✅ Terminé (S3 : recall métier ✅, F1 cible 0.72 reporté au S4/S5)
 
@@ -295,6 +295,16 @@ F1-Macro recall champion : 0.6289 — compromis recall / précision attendu.
 **Commande :** `streamlit run dashboard/app.py`
 
 **Prochaine étape :** Sprint 8 — tests simulation E2E.
+
+---
+
+### 📅 2026-06-19 — Session 13 : Sprint 9 (rapport académique)
+
+**Actions :** rédaction `reports/AquaSense_AI_Report.md` (synthèse S0–S8), `reports/presentation.md` (15 slides), `reports/sprint_09_final_report.md`.
+
+**Contenu rapport :** contexte Maroc, dataset proxy, ML/DL, MQTT, dashboard, tests 37/37, limites transfert, annexes.
+
+**Reste S9 :** export PDF (`AquaSense_AI_Report.pdf`, `presentation.pdf`), tag `v1.0.0`, test reproductibilité clone frais.
 
 ---
 

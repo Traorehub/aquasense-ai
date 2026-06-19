@@ -1,0 +1,1798 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{ragged2e}
+\usepackage{microtype}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+
+% --- Charte couleurs EHTP / AquaSense ---
+\definecolor{EHTPPrimary}{HTML}{1B4F72}
+\definecolor{EHTPSecondary}{HTML}{2874A6}
+\definecolor{EHTPAccent}{HTML}{17A589}
+\definecolor{EHTPText}{HTML}{2C3E50}
+\definecolor{EHTPLight}{HTML}{F4F7F9}
+\definecolor{EHTPTableHead}{HTML}{D6EAF8}
+\definecolor{EHTPAlert}{HTML}{C0392B}
+
+\usepackage{microtype}
+
+\geometry{margin=2.5cm}
+\color{EHTPText}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=EHTPSecondary,
+  urlcolor=EHTPAccent,
+  citecolor=EHTPPrimary
+}
+\graphicspath{{reports/}{reports/image/}}
+
+% --- Titres : pas de "Chapitre N" (le titre Sprint 0 / Introduction suffit) ---
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{EHTPPrimary}}
+  {}
+  {0pt}
+  {\Huge\color{EHTPPrimary}}
+  [\vspace{0.4em}{\color{EHTPAccent}\titlerule[1.2pt]}\vspace{0.6em}]
+
+\titleformat{name=\chapter,numberless}[display]
+  {\normalfont\huge\bfseries\color{EHTPPrimary}}
+  {}
+  {0pt}
+  {\Huge\color{EHTPPrimary}}
+  [\vspace{0.5em}{\color{EHTPAccent}\titlerule[1.5pt]}]
+
+\titleformat{\section}
+  {\Large\bfseries\color{EHTPSecondary}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\large\bfseries\color{EHTPPrimary}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{EHTPSecondary}}
+  {\thesubsubsection}{1em}{}
+
+% --- En-tetes / pieds de page ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{EHTPSecondary}\nouppercase\leftmark}
+\fancyhead[R]{}
+\fancyfoot[C]{\small\color{EHTPPrimary}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{EHTPAccent}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{EHTPAccent}\leaders\hrule height \footrulewidth\hfill}}
+
+\captionsetup{
+  labelfont={bf,color=EHTPPrimary},
+  textfont={color=EHTPText},
+  skip=8pt
+}
+
+\lstset{
+  basicstyle=\ttfamily\small\color{EHTPText},
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{EHTPSecondary},
+  backgroundcolor=\color{EHTPLight},
+}
+
+\setlist[itemize]{label=\textcolor{EHTPAccent}{\textbullet}}
+\setlist[enumerate]{label=\textcolor{EHTPPrimary}{\arabic*.}}
+
+% --- Page de garde coloree ---
+\newcommand{\makecoverpage}{%
+\begin{titlepage}
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[EHTPPrimary] (current page.north west) rectangle ([yshift=-7.2cm]current page.north east);
+    \fill[EHTPLight] ([yshift=-7.2cm]current page.north west) rectangle (current page.south east);
+    \draw[EHTPAccent,line width=2pt] ([yshift=-7.2cm]current page.west) -- ([yshift=-7.2cm]current page.east);
+  \end{tikzpicture}
+  \vspace*{1.2cm}
+  {\color{white}\textbf{\large École Hassania des Travaux Publics (EHTP)}}\\[0.5cm]
+  {\color{white}\large Projet Machine Learning}\\[2.8cm]
+  \begin{flushleft}
+  {\fontsize{28}{32}\selectfont\bfseries\color{EHTPPrimary}AquaSense AI}\\[0.6cm]
+  {\Large\color{EHTPSecondary}Maintenance prédictive des forages et points d'eau}\\[0.3cm]
+  {\large\color{EHTPAccent}en contexte marocain}\\[1.8cm]
+  {\Large\bfseries\color{EHTPPrimary}Rapport de projet}\\[2.5cm]
+  \begin{minipage}{0.85\textwidth}
+  \color{EHTPText}
+  \textbf{Équipe :}\\[0.2cm]
+  TRAORE Fanogo Mohamed\\
+  NADAHE Mohamed\\[0.8cm]
+  \textbf{Encadrement :} Dr. Rym Nassih\\[0.8cm]
+  \textbf{Date :} Juin 2026
+  \end{minipage}
+  \end{flushleft}
+\end{titlepage}
+}
+
+\begin{document}
+\makecoverpage
+\tableofcontents
+\newpage
+
+
+\chapter*{Résumé exécutif}
+
+\addcontentsline{toc}{chapter}{Résumé exécutif}
+
+Le Maroc fait face à un stress hydrique structurel et au vieillissement des installations d'eau en zones rurales. Les inspections terrain sont coûteuses et souvent tardives, ce qui retarde les réparations sur les pompes dégradées. \textbf{AquaSense AI} propose un système complet de \textbf{maintenance prédictive} : classification automatique de l'état opérationnel d'un point d'eau en trois catégories (\textit{fonctionnel}, \textit{nécessite une réparation}, \textit{hors service}), simulation IoT par MQTT, inférence temps réel et dashboard de supervision.
+
+Le pipeline a été développé sur le benchmark international \textbf{Pump It Up} (59 400 pompes labellisées, Tanzanie, DrivenData), retenu comme jeu de données de référence faute de jeu de données marocain ouvert et reproductible à cette échelle. Le modèle de production (\textbf{XGBoost SMOTE + seuil calibré à 0,17}) atteint un \textbf{rappel (recall) de 0,685} sur la classe critique \textit{functional needs repair} : objectif métier $\geq$ 0,65 atteint. Le \textbf{F1-Macro} maximal est de \textbf{0,679} (Soft Voting RF+XGB), légèrement sous la cible scientifique de 0,72. Le Deep Learning (6 architectures, tuning Colab GPU) n'a pas surpassé le ML classique (meilleur F1 DL = 0,541).
+
+Le déploiement du prototype comprend une simulation MQTT de \textbf{50 pompes} (3 scénarios, saison sèche juin-septembre), un consumer d'inférence (\textbf{22-70 ms}), un dashboard Streamlit orienté Maroc et \textbf{37 tests pytest} (100 \% de réussite). Le choix des métriques d'évaluation (F1-Macro, recall, et non l'accuracy ou la précision seules) est justifié en détail au chapitre 2.
+
+\textbf{Mots-clés :} maintenance prédictive, forages, points d'eau, Maroc, Machine Learning, XGBoost, MQTT, Streamlit, métriques de classification, déséquilibre de classes.
+
+\chapter{Introduction et problématique}
+
+\subsection{Contexte marocain}
+
+Le Maroc connaît une pression hydrique croissante : sécheresses récurrentes, baisse des nappes dans plusieurs bassins, et demande accrue en irrigation et en approvisionnement rural. Les \textbf{forages et points d'eau} constituent l'infrastructure de base pour des millions de personnes en zones rurales et périurbaines. Une pompe défaillante peut priver un douar entier d'eau potable pendant des semaines, avec des impacts sanitaires, agricoles et économiques majeurs.
+
+Les acteurs institutionnels (ONEE, ABH) gèrent des milliers d'installations. Les inspections terrain restent néanmoins coûteuses, peu fréquentes et majoritairement réactives : on intervient après la panne plutôt qu'avant. La maintenance prédictive vise à prioriser les interventions sur les pompes à risque, en exploitant des données historiques et, à terme, des capteurs IoT (débit, pression, vibration).
+
+\subsection{Question de recherche}
+
+\begin{quote}
+
+\textit{Peut-on prédire automatiquement l'état opérationnel d'un point d'eau (fonctionnel / dégradé / hors service) à partir de caractéristiques observables, avec un rappel suffisant sur la classe critique « nécessite une réparation » ?}
+
+\end{quote}
+
+Cette question est \textbf{opérationnelle} (état de la pompe et du forage), et non hydrogéologique (niveau de nappe, salinité) : bien que ces dimensions soient centrales au Maroc et constituent une limite assumée du présent travail.
+
+\subsection{Objectifs du projet}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Objectif & Indicateur & Cible & Résultat final \\
+\midrule
+Classification multi-classe équilibrée & F1-Macro & $\geq$ 0,72 & 0,679 (Voting RF+XGB) \\
+Détection précoce maintenance & Recall \textit{needs repair} & $\geq$ 0,65 & 0,685 (XGB SMOTE+seuil), objectif atteint \\
+Pipeline temps réel & Latence inférence & < 5 s & 22-70 ms \\
+Validation automatisée & Tests pytest & $\geq$ 80 \% & 100 \% (37/37) \\
+Démo opérationnelle & Dashboard + MQTT & Fonctionnel & Réalisé \\
+\bottomrule
+\end{longtable}
+}
+
+\textit{Les indicateurs F1-Macro et recall sont définis et justifiés au chapitre 2.}
+
+\subsection{Problem Statement (formulation du problème)}
+
+\textbf{Contexte :} Au Maroc, le stress hydrique et le vieillissement des forages ruraux rendent la maintenance préventive des pompes stratégique. Les données institutionnelles (ONEE, ABH) ne sont pas accessibles sous forme d'un jeu labellisé ouvert à grande échelle.
+
+\textbf{Problème :} Comment identifier automatiquement les pompes dégradées nécessitant une intervention, à partir de caractéristiques structurelles (âge, type d'extraction, gestion, financement, localisation) ?
+
+\textbf{Approche :} Développer et valider un pipeline ML reproductible sur le benchmark Pump It Up (structure analogue aux points d'eau ruraux), puis le déployer en simulation IoT avec supervision dashboard, en vue d'un transfert futur sur données nationales.
+
+\subsection{Contexte méthodologique}
+
+Les systèmes experts historiques (ex. MYCIN, années 1970) utilisaient des règles explicites codées par des experts. Sur des données tabulaires hétérogènes à grande échelle (59 400 enregistrements, 28 variables catégorielles), les approches \textbf{apprentissage automatique} surpassent les règles manuelles : les interactions entre financement, âge, gestion et géographie ne sont pas exhaustives à formaliser à la main. AquaSense AI adopte donc un paradigme \textbf{supervisé} (classification 3 classes) plutôt qu'un moteur de règles, tout en documentant les limites et les biais pour un usage responsable.
+
+\chapter{Choix des métriques d'évaluation}
+
+Ce chapitre justifie les indicateurs retenus pour juger les modèles. En classification supervisée, plusieurs scores sont possibles (accuracy, précision, rappel, F1). Nous expliquons pourquoi AquaSense AI s'appuie principalement sur le \textbf{F1-Macro} et le \textbf{recall} de la classe \textit{functional needs repair}, et pourquoi les autres métriques, prises isolément, ne suffisent pas.
+
+\subsection{Le problème posé par nos données}
+
+Notre jeu comporte \textbf{trois classes} avec des effectifs très différents :
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Classe & Proportion \\
+\midrule
+functional & 54,3 \% \\
+non functional & 38,4 \% \\
+functional needs repair & \textbf{7,3 \%} \\
+\bottomrule
+\end{longtable}
+}
+
+La classe \textit{needs repair} est la plus \textbf{rare} mais la plus \textbf{critique} pour la maintenance au Maroc : une pompe dégradée non détectée peut laisser un douar sans eau. Toute métrique qui ignore ce déséquilibre risque de valoriser un modèle qui prédit presque toujours « fonctionnel ».
+
+\subsection{Définitions (par classe)}
+
+Pour chaque classe, on compare les prédictions du modèle au label réel et on calcule :
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Formule & Lecture métier \\
+\midrule
+\textbf{Vrais positifs (VP)} & Prédit la classe et c'est correct & Bonne alerte ou bon diagnostic \\
+\textbf{Faux positifs (FP)} & Prédit la classe à tort & Fausses alertes \\
+\textbf{Faux négatifs (FN)} & N'a pas prédit la classe alors qu'elle est vraie & Pompe à risque \textbf{ratée} \\
+\textbf{Précision} & VP / (VP + FP) & Parmi les alertes émises, combien sont justes ? \\
+\textbf{Rappel (recall)} & VP / (VP + FN) & Parmi les vraies pompes à réparer, combien ont été trouvées ? \\
+\textbf{F1-score (une classe)} & 2 × Précision × Rappel / (Précision + Rappel) & Compromis précision/rappel \textbf{pour cette classe seulement} \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{F1-Macro : ce n'est pas « le » F1-score}
+
+\textbf{Point important :} le terme « F1-score » seul désigne le F1 \textbf{d'une classe}. Le \textbf{F1-Macro} est une \textbf{autre grandeur} : la moyenne des trois F1 par classe, \textbf{sans pondération} par l'effectif :
+
+\begin{lstlisting}
+
+F1-Macro = (F1\_functional + F1\_needs\_repair + F1\_non\_functional) / 3
+
+\end{lstlisting}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Terme & Signification \\
+\midrule
+F1-score (classe X) & Performance sur \textbf{une} classe \\
+F1-Macro & Performance \textbf{globale équitable} sur les \textbf{trois} classes \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Exemple chiffré} (champion recall, jeu de test 11 880 pompes) :
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Classe & Pompes (support) & F1 de la classe \\
+\midrule
+functional & 6 452 & 0,76 \\
+functional needs repair & 863 & 0,39 \\
+non functional & 4 565 & 0,74 \\
+\textbf{F1-Macro} & / & \textbf{(0,76 + 0,39 + 0,74) / 3 = 0,63} \\
+\bottomrule
+\end{longtable}
+}
+
+Un modèle peut donc avoir un bon rappel sur \textit{needs repair} tout en affichant un F1-Macro plus modeste, car les trois classes entrent dans la moyenne.
+
+\subsection{Pourquoi nous n'avons pas retenu l'accuracy comme métrique principale}
+
+L'\textbf{accuracy} mesure la part de prédictions correctes sur l'ensemble des pompes :
+
+\begin{lstlisting}
+
+Accuracy = (nombre de bonnes prédictions) / (total)
+
+\end{lstlisting}
+
+\textbf{Limite sur données déséquilibrées :} un modèle trivial qui répond toujours « functional » obtient environ \textbf{54 \% d'accuracy} (la proportion de la classe majoritaire), tout en ratant \textbf{100 \%} des pompes à réparer.
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Modèle naïf & Accuracy & Recall needs repair \\
+\midrule
+Toujours « functional » & \textasciitilde{}54 \% & \textbf{0 \%} \\
+\bottomrule
+\end{longtable}
+}
+
+Notre champion recall affiche une accuracy de 0,705, ce qui paraît correct, mais ce chiffre ne dit pas si les pompes dégradées sont bien détectées. Nous reportons l'accuracy en \textbf{complément}, jamais comme critère de sélection.
+
+\subsection{Pourquoi nous n'avons pas retenu la précision seule}
+
+La \textbf{précision} sur \textit{needs repair} répond à : « Quand le modèle déclenche une alerte, a-t-il raison ? ». Maximiser uniquement la précision pousse à n'alerter que dans les cas quasi certains.
+
+\textbf{Conséquence :} de nombreuses pompes réellement dégradées ne seraient pas signalées (rappel faible). Or, au Maroc, \textbf{manquer une dégradation} coûte souvent plus cher qu'une fausse alerte (déplacement technicien inutile).
+
+Sur le champion recall, la précision sur \textit{needs repair} est d'environ \textbf{0,28 à 0,40} : beaucoup de fausses alertes, assumées pour maintenir un rappel de \textbf{0,685}. La précision sert à \textbf{quantifier} ce compromis, pas à choisir seule le modèle.
+
+\subsection{Pourquoi nous n'avons pas retenu le recall seul}
+
+Le \textbf{rappel} sur \textit{needs repair} répond à : « Parmi les vraies pompes à réparer, combien le modèle en trouve ? ». C'est central pour la maintenance, mais \textbf{insuffisant seul}.
+
+\textbf{Contre-exemple observé en S4 (Deep Learning) :} un MLP tuné atteint un recall de \textbf{0,93} sur \textit{needs repair}, mais :
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur \\
+\midrule
+Recall needs repair & 0,93 \\
+Accuracy & 0,38 \\
+F1-Macro & 0,38 \\
+\bottomrule
+\end{longtable}
+}
+
+Le modèle classe presque tout en « à réparer » : utile pour illustrer le piège du recall isolé, \textbf{non déployable} en production. D'où le couplage avec le F1-Macro pour garder une vue sur les trois classes.
+
+\subsection{Synthèse : métriques retenues et rôle de chacune}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Rôle dans le projet & Retenue comme objectif principal ? \\
+\midrule
+\textbf{F1-Macro} & Comparer ML, DL et voting de façon équitable sur 3 classes & \textbf{Oui} (objectif scientifique $\geq$ 0,72) \\
+\textbf{Recall \textit{needs repair}} & Mesurer la détection des pompes dégradées (priorité terrain Maroc) & \textbf{Oui} (objectif métier $\geq$ 0,65) \\
+Précision \textit{needs repair} & Estimer le taux de fausses alertes & Non (complément) \\
+Accuracy & Lecture globale intuitive & Non (complément) \\
+F1 par classe & Diagnostiquer quelle classe est mal prédite & Non (analyse détaillée) \\
+ROC-AUC macro & Capacité de séparation des classes & Non (complément) \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Deux objectifs, deux modèles champions (S5)}
+
+On ne peut pas maximiser simultanément F1-Macro et recall \textit{needs repair} avec un \textbf{seul} seuil de décision :
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Stratégie & Effet \\
+\midrule
+Seuil bas (favoriser le recall) & Plus de pompes à risque détectées, plus de fausses alertes, F1-Macro en baisse \\
+Seuil haut (favoriser la précision / F1 global) & Moins de fausses alertes, mais pompes dégradées ratées \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Arbitrage retenu :}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Usage & Modèle & Métrique clé & Valeur \\
+\midrule
+Alertes dashboard et MQTT & XGB SMOTE + seuil 0,17 & Recall needs repair & \textbf{0,685} (objectif atteint) \\
+Comparaison scientifique / analytics & Voting RF + XGB & F1-Macro & \textbf{0,679} (écart −0,04 vs 0,72) \\
+\bottomrule
+\end{longtable}
+}
+
+Ce double choix n'est pas une contradiction : il reflète deux questions différentes (détection terrain vs performance globale sur trois classes).
+
+\subsection{Objectifs chiffrés et bilan}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Seuil fixé & Résultat & Statut \\
+\midrule
+F1-Macro & $\geq$ 0,72 & 0,679 (Voting RF+XGB) & Non atteint \\
+Recall needs repair & $\geq$ 0,65 & 0,685 (XGB SMOTE + seuil) & Atteint \\
+\bottomrule
+\end{longtable}
+}
+
+L'écart sur F1-Macro (−0,04) est cohérent avec la littérature Pump It Up et avec le compromis volontaire du recall boost (SMOTE + abaissement du seuil de décision).
+
+\subsection{Explication de l'origine des seuils numériques (pourquoi 0,72, 0,65, etc.)}
+
+Les valeurs cibles ne sont pas tirées d'une norme ONEE ni d'un texte réglementaire marocain. Elles ont été \textbf{fixées au cadrage du projet} (Sprint 1, Problem Statement dans \texttt{notebooks/01\_eda.ipynb}) et reprises dans le \textbf{backlog du projet} (\texttt{AquaSense\_AI\_Sprints\_Backlog.md}, critères d'acceptation S3, S5 et S8). Elles servent de \textbf{références internes} pour juger si le pipeline est exploitable. A notre connaisance il n'en n'existe pas selon la strategie marocain ni selon des loi international de l'IA.
+
+\textbf{Ces seuils sont-ils « arbitraires » ?} Non, au sens de valeurs choisies sans raison : chaque seuil répond à une \textbf{exigence formulée} (équilibre sur 3 classes, détection des pompes dégradées, temps réel MQTT, fiabilité des tests). En revanche, oui au sens où \textbf{personne ne nous a imposé} 0,72 ou 0,65 par une réglementation : ce sont des \textbf{critères d'acceptation du projet}, fixés par l'équipe avec l'encadrement au démarrage (S1), en s'appuyant sur (1) le déséquilibre des classes (7 \% de \textit{needs repair}), (2) les scores observés sur Pump It Up en littérature et dans nos baselines (\textasciitilde{}0,67 F1-Macro), et (3) la logique métier Maroc (priorité au rappel sur la classe rare). Les chiffres exacts \textbf{0,72} et \textbf{0,65} n'ont pas été déduits d'une formule unique ; ils traduisent un compromis \textbf{ambitieux mais atteignable} pour un projet de semestre. Seul le seuil \textbf{0,17} (décision recall boost) est \textbf{appris} sur les données, pas fixé à l'avance.
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Seuil & Valeur & D'où vient-il ? & Pourquoi cette valeur ? \\
+\midrule
+\textbf{F1-Macro} & $\geq$ 0,72 & Backlog S3/S5 + EDA §9 & Exiger une performance \textbf{équilibrée} sur les 3 classes, pas seulement sur la classe majoritaire. Le plaford observé en ML classique sur Pump It Up est d'environ \textbf{0,67} (RF tuned, S3). Le seuil \textbf{0,72} est donc \textbf{légèrement au-dessus} de ce que nous avons effectivement atteint en baseline, pour viser un modèle « bon » sans viser le niveau des gagnants DrivenData (> 0,80 avec feature engineering poussé). C'est un objectif \textbf{ambitieux mais réaliste} pour un projet de semestre. \\
+\textbf{Recall \textit{needs repair}} & $\geq$ 0,65 & Backlog S3/S5/S8 + EDA §9 & La classe critique ne représente que \textbf{7 \%} des pompes. Détecter \textbf{65 \%} des vraies pompes dégradées signifie en repérer environ \textbf{deux tiers} avant panne complète. Au Maroc, \textbf{rater une dégradation} (faux négatif) est plus coûteux qu'une fausse alerte (déplacement technicien inutile) : d'où un seuil de rappel \textbf{élevé} plutôt qu'un seuil de précision. La valeur \textbf{0,65} est aussi proche du recall natif du XGBoost tuned (\textbf{0,64}, S3) avant recall boost. \\
+\textbf{Latence MQTT $\rightarrow$ prédiction} & < 5 s & Backlog S6 & Contrainte \textbf{temps réel} pour la démo IoT : le technicien doit voir une prédiction peu après la télémétrie. Nos mesures (\textbf{22-70 ms}) sont très en dessous de ce plafond. \\
+\textbf{Latence inférence (unitaire)} & < 500 ms & Backlog S8-06 & Benchmark CPU local sur une pompe ; garantit que l'inférence n'est pas le goulot d'étranglement du pipeline. \\
+\textbf{Tests pytest} & $\geq$ 80 \% de réussite & Backlog S8 & Standard minimal de fiabilité logicielle pour un livrable reproductible. Nous avons atteint \textbf{100 \%} (37/37). \\
+\textbf{50 pompes simulées} & 50 & Backlog S6 & Charge de démonstration représentative (réseau rural) sans saturer un broker Mosquitto local en TP. \\
+\textbf{Seuil décision recall boost} & 0,17 & \textbf{Appris} (S3/S5) & Ce n'est \textbf{pas} un objectif fixé à l'avance : il est \textbf{calibré} sur un hold-out 20 \% du train pour maximiser le recall \textit{needs repair} sous contrainte de F1 acceptable (\texttt{python -m src.train recall} puis \texttt{final}). \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Synthèse :} les seuils \textbf{0,72} et \textbf{0,65} traduisent deux exigences complémentaires fixées dès le Problem Statement : un modèle \textbf{scientifiquement équilibré} (F1-Macro) et un modèle \textbf{orienté terrain} (recall sur la classe rare). Les autres seuils relèvent du backlog technique (MQTT, tests). Seul le seuil \textbf{0,17} est un paramètre \textbf{appris} pendant l'entraînement, pas une cible initiale.
+
+\chapter{Contexte marocain et choix du dataset proxy}
+
+\subsection{Problème réel visé}
+
+AquaSense AI vise la maintenance prédictive des forages et points d'eau en contexte marocain : stress hydrique, vieillissement des installations rurales, coût des inspections terrain, besoin de \textbf{prioriser} les interventions sur les pompes « à risque ».
+
+\subsection{Comparaison données Maroc vs Pump It Up}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Critère & Données Maroc (ONEE, ABH) & Pump It Up (Tanzanie) \\
+\midrule
+Volume labellisé & Fragmenté, sur demande & \textbf{59 400} pompes \\
+Accès & Institutionnel, souvent payant & \textbf{Open data} (DrivenData) \\
+Labels 3 classes & Rarement public & Oui \\
+Reproductibilité & Difficile & Oui \texttt{download\_data.py} \\
+Structure (forage, pompe, gestion, GPS) & Analogue & Oui \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Décision :} entraîner et valider sur Pump It Up, motiver par le contexte marocain, documenter les limites de transfert.
+
+\subsection{Analogie conceptuelle Maroc ↔ Tanzanie}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Concept & Maroc & Pump It Up \\
+\midrule
+Point d'eau rural & Douar, commune rurale & Village tanzanien \\
+Forage / source & Nappe, borehole ONEE/ABH & \texttt{waterpoint\_type}, \texttt{source\_type} \\
+Pompe & Manuelle, motorisée, solaire & \texttt{extraction\_type} \\
+Gestion & Association, commune, ABH & \texttt{management}, \texttt{payment} \\
+Financement & État, coopérative, ONG & \texttt{funder}, \texttt{installer} \\
+Usure & Âge, population desservie & \texttt{pump\_age}, \texttt{population} \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Ce qui est conservé vs adapté}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Élément & Statut \\
+\midrule
+Paradigme classification 3 classes & Oui \\
+Pipeline preprocessing S2 & Oui \\
+Métriques F1-Macro + Recall needs repair & Oui \\
+Simulation MQTT + dashboard & Oui \\
+Problem Statement & Oui Contexte Maroc \\
+Carte dashboard & Oui Présentation Maroc (positions démo) \\
+Saison simulation & Oui Juin–septembre (saison sèche Maroc) \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Phrase de cadrage}
+
+\begin{quote}
+
+\textit{AquaSense AI répond à la problématique marocaine de maintenance des forages et points d'eau en zone rurale. Le pipeline prédictif est développé et benchmarké sur le jeu international Pump It Up, retenu pour sa richesse, ses labels et sa reproductibilité, en vue d'un déploiement futur sur des données nationales (ONEE, ABH, SNIE).}
+
+\end{quote}
+
+\chapter{Architecture globale du système}
+
+\subsection{Pipeline de bout en bout}
+
+\begin{lstlisting}
+
+[Contexte Maroc : maintenance forages \& points d'eau]
+        │
+        ▼
+[Dataset proxy : Pump It Up : 59 400 pompes labellisées]
+        │
+        ▼
+  S0 Setup ──► data/raw/*.csv
+        │
+        ▼
+  S1 EDA ──► Anomalies, imbalance, Problem Statement
+        │
+        ▼
+  S2 Wrangling ──► src/preprocessing.py ──► data/cleaned/
+        │
+        ├──────────────────┐
+        ▼                  ▼
+  S3 ML Classique    S4 Deep Learning
+        │                  │
+        └────────┬─────────┘
+                 ▼
+  S5 Arbitrage ──► champion\_production\_v1.joblib
+                 │
+                 ▼
+  S6 MQTT ──► Simulateur $\rightarrow$ Mosquitto $\rightarrow$ Consumer $\rightarrow$ SQLite
+                 │
+                 ▼
+  S7 Dashboard ──► Streamlit (carte Maroc, KPIs, alertes)
+                 │
+                 ▼
+  S8 Tests ──► pytest 37/37
+
+\end{lstlisting}
+
+\subsection{Stack technique}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Couche & Technologies \\
+\midrule
+Données & pandas, numpy, SQLite3 \\
+ML & scikit-learn, XGBoost, imbalanced-learn, joblib \\
+Deep Learning & TensorFlow/Keras \\
+IoT simulé & paho-mqtt, Mosquitto, Faker \\
+Dashboard & Streamlit, Plotly \\
+Tests & pytest \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Structure du dépôt}
+
+\begin{lstlisting}
+
+AquaSense\_AI/
+├── PROJECT\_OVERVIEW.md
+├── README.md
+├── requirements.txt
+├── data/raw/              \# NON versionné Git (\textasciitilde{}25 Mo)
+├── data/cleaned/          \# train\_clean.csv, test\_clean.csv
+├── data/mqtt/             \# aquasense.db
+├── data/simulated/        \# pump\_profiles.json
+├── src/                   \# preprocessing, train, train\_dl, simulator, mqtt\_consumer…
+├── models/                \# .joblib, .keras
+├── dashboard/             \# app.py, data.py, theme.py
+├── notebooks/             \# 00\_setup $\rightarrow$ 05\_comparison\_final
+├── tests/                 \# 37 tests pytest
+├── scripts/               \# download\_data.py, test\_mqtt\_e2e.py
+└── reports/               \# rapports, graphiques, captures
+
+\end{lstlisting}
+
+\part{Réalisation technique}
+
+\clearpage
+
+\chapter[Sprint 0]{Sprint 0 : Setup et environnement}
+
+\label{ch:sprint0}
+
+\subsection{Objectif}
+
+Mettre en place un environnement \textbf{reproductible} : structure dépôt, dépendances Python, accès au dataset, audit initial.
+
+\subsection{Livrables}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Livrable & Fichier \\
+\midrule
+Structure projet & Dossiers data/, src/, notebooks/, dashboard/, tests/ \\
+Dépendances & requirements.txt (versions pinnées) \\
+Exclusion Git & .gitignore (data/raw, .venv, models, .env) \\
+Téléchargement & scripts/download\_data.py \\
+Audit initial & notebooks/00\_setup.ipynb \\
+Documentation & README.md, PROJECT\_OVERVIEW.md \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Environnement Python}
+
+\begin{lstlisting}
+
+python -m venv .venv
+.\textbackslash\{\}.venv\textbackslash\{\}Scripts\textbackslash\{\}Activate.ps1
+pip install -r requirements.txt
+
+\end{lstlisting}
+
+\textbf{Motivation des versions pinnées :} même environnement sur les deux machines de l'équipe et pour le correcteur ; évite qu'une mise à jour scikit-learn ou TensorFlow casse le pipeline entre sprints.
+
+\subsection{Dataset Pump It Up}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Fichier & Taille & Rôle \\
+\midrule
+train\_values.csv & 19,1 Mo & 59 400 × 40 features \\
+train\_labels.csv & 1,1 Mo & Labels status\_group \\
+test\_values.csv & 4,8 Mo & 14 850 pompes (sans labels publics compétition) \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Source :} [Pump It Up : DrivenData](https://www.drivendata.org/competitions/7/) : Taarifa + Tanzanian Ministry of Water.
+
+\subsection{Audit initial validé}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Dataset & Shape attendue & Shape obtenue \\
+\midrule
+train\_values & (59 400, 40) & Oui (59 400, 40) \\
+train\_labels & (59 400, 2) & Oui (59 400, 2) \\
+test\_values & (14 850, 40) & Oui (14 850, 40) \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Types :} 28 colonnes texte, 7 entiers, 3 float, 2 objet mixte.
+
+\textbf{Distribution cible (découverte critique dès S0) :}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Classe & Count & \% \\
+\midrule
+functional & 32 259 & 54,3 \% \\
+non functional & 22 824 & 38,4 \% \\
+functional needs repair & 4 317 & \textbf{7,3 \%} \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Valeurs manquantes notables :}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Colonne & NaN & \% \\
+\midrule
+scheme\_name & 28 810 & 48,5 \% \\
+scheme\_management & 3 878 & 6,5 \% \\
+installer & 3 655 & 6,2 \% \\
+funder & 3 637 & 6,1 \% \\
+public\_meeting & 3 334 & 5,6 \% \\
+\bottomrule
+\end{longtable}
+}
+
+Ces constats alimentent directement le wrangling S2 et la stratégie d'imbalance S3.
+
+\clearpage
+
+\chapter[Sprint 1]{Sprint 1 : Acquisition et analyse exploratoire}
+
+\label{ch:sprint1}
+
+\subsection{Objectif}
+
+Comprendre en profondeur le dataset : fusion train+labels, visualisations, catalogue d'anomalies, Problem Statement Maroc, stratégie d'imbalance.
+
+\subsection{Données clés confirmées}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Élément & Valeur \\
+\midrule
+Shape train unifié & 59 400 × 41 \\
+GPS invalides (longitude = 0) & 1 812 (3,0 \%) \\
+construction\_year = 0 & 20 709 (34,9 \%) \\
+gps\_height < 0 & 1 496 (2,5 \%) \\
+amount\_tsh = 0 & 41 639 (70,1 \%) \\
+NaN scheme\_name & 28 810 (48,5 \%) \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Visualisations produites (12+ graphiques)}
+
+1. Heatmap de nullité
+
+2. Barplot + pie chart distribution cible
+
+3. 6 histogrammes numériques (amount\_tsh, gps\_height, population, construction\_year, lon, lat)
+
+4. 4 boxplots numériques par statut
+
+5. 5 barplots catégoriels (top 10)
+
+6. Barplot empilé statut par basin
+
+7. Scatter map lat/lon coloré par statut (Tanzanie : données d'origine)
+
+8. Heatmap corrélation numérique
+
+9. Barplot enquêtes par année (2011–2013)
+
+10. Année construction moyenne par statut
+
+11. Histogramme âge pompe au survey par statut
+
+Chaque graphique est commenté dans \texttt{notebooks/01\_eda.ipynb}.
+
+\subsection{Stratégie d'imbalance (décision S1 $\rightarrow$ S3)}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Approche & Usage \\
+\midrule
+class\_weight='balanced' & Logistic Regression, Random Forest \\
+sample\_weight balanced & XGBoost \\
+SMOTE (option) & Si recall needs repair < 0,65 \\
+Métriques & F1-Macro $\geq$ 0,72 ,  Recall needs repair $\geq$ 0,65 \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Justification :} avec 7,3 \% de \textit{needs repair}, l'accuracy seule est trompeuse ; la priorité métier Maroc est de ne pas rater les pompes dégradées.
+
+\subsection{Catalogue anomalies $\rightarrow$ actions S2}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Anomalie EDA & Traitement S2 \\
+\midrule
+GPS = 0 & Centroïde basin/région \\
+construction\_year = 0 & Flag year\_unknown + imputation médiane basin \\
+gps\_height < 0 & Imputation médiane basin \\
+amount\_tsh = 0 & Flag tsh\_is\_zero + imputation médiane positives \\
+funder/installer haute cardinalité & Top-20 + « other » \\
+Colonnes redondantes & Suppression (quantity\_group, etc.) \\
+\bottomrule
+\end{longtable}
+}
+
+\clearpage
+
+\chapter[Sprint 2]{Sprint 2 : Wrangling et feature engineering}
+
+\label{ch:sprint2}
+
+\subsection{Objectif et livrables}
+
+Transformer 59 400 × 40 colonnes brutes en jeu propre 26 features + cible, reproductible via \texttt{PumpPreprocessor} (fit/transform).
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Livrable & Détail \\
+\midrule
+src/preprocessing.py & Pipeline principal \\
+data/cleaned/train\_clean.csv & 59 400 × 37 colonnes \\
+data/cleaned/test\_clean.csv & 14 850 × 36 colonnes \\
+tests/test\_preprocessing.py & 13 tests unitaires Oui \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Pattern fit/transform : anti data leakage}
+
+\begin{lstlisting}
+
+prep = PumpPreprocessor()
+prep.fit(train\_values)           \# statistiques sur TRAIN uniquement
+train\_clean = prep.transform(train\_values)
+test\_clean = prep.transform(test\_values)
+
+\end{lstlisting}
+
+Les médianes, centroïdes GPS et top-20 funder/installer sont appris \textbf{uniquement} sur le train. Le même pipeline sert en inférence MQTT (S6).
+
+\subsection{Nettoyage détaillé}
+
+\#\#\#\# GPS invalides (longitude = 0)
+
+\begin{itemize}
+
+\item \textbf{Problème :} 1 812 pompes en mer (Golfe de Guinée), pas en Tanzanie
+
+\item \textbf{Solution :} remplacement par centroïde du \textbf{basin} (médiane lat/lon des pompes valides du même basin), sinon région, sinon médiane globale
+
+\item \textbf{Seuil :} |longitude| < 0,01 ou |latitude| < 0,01
+
+\item \textbf{Rejeté :} supprimer les lignes (perte 3 \%) ; garder (0,0) (fausse la géographie)
+
+\end{itemize}
+
+\#\#\#\# construction\_year = 0
+
+\begin{itemize}
+
+\item \textbf{Problème :} 34,9 \% : code « année inconnue », pas l'an 0
+
+\item \textbf{Solution :} flag \texttt{year\_unknown = 1}, imputation médiane du basin
+
+\item \textbf{Rejeté :} laisser 0 (pump\_age absurde) ; supprimer 35 \% des lignes
+
+\end{itemize}
+
+\#\#\#\# gps\_height négatif
+
+\begin{itemize}
+
+\item \textbf{Problème :} 1 496 valeurs (ex. −21 m)
+
+\item \textbf{Solution :} NaN puis médiane basin
+
+\item \textbf{Rejeté :} clipper à 0 (perd l'information relative)
+
+\end{itemize}
+
+\#\#\#\# funder et installer (haute cardinalité)
+
+\begin{itemize}
+
+\item \textbf{Problème :} 1 896 funders, 2 145 installers
+
+\item \textbf{Solution :} lowercase + strip + top-20 + « other »
+
+\item \textbf{Rejeté :} one-hot sur 2000 catégories (overfitting)
+
+\end{itemize}
+
+\#\#\#\# amount\_tsh = 0
+
+\begin{itemize}
+
+\item \textbf{Problème :} 70,1 \% à zéro : pompe gravitaire légitime ou donnée manquante ?
+
+\item \textbf{Solution :} flag \texttt{tsh\_is\_zero = 1}, imputation médiane des valeurs strictement positives (\textasciitilde{}25 m)
+
+\item \textbf{Rejeté :} traiter tous les 0 comme manquants sans flag
+
+\end{itemize}
+
+\#\#\#\# Colonnes supprimées
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Colonne & Raison \\
+\midrule
+quantity\_group, extraction\_type\_group, waterpoint\_type\_group, quality\_group & Redondantes (>89 \% identiques) \\
+region\_code, district\_code & Doublons numériques de region/district \\
+recorded\_by & Quasi-constant \\
+scheme\_name & >90 \% vide \\
+wpt\_name, subvillage, ward, lga & Cardinalité extrême, identifiants locaux \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Feature engineering (8 features dérivées)}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Feature & Formule / logique & Motivation \\
+\midrule
+year\_recorded, month\_recorded, day\_of\_year & Extraites de date\_recorded & Saisonnalité (sèche juin–sept pertinent Maroc) \\
+pump\_age & 2024 − construction\_year & Usure actuelle \\
+age\_at\_recording & year\_recorded − construction\_year & Âge au moment du survey (plus précis historiquement) \\
+dist\_to\_basin\_center & Haversine vers centroïde basin & Isolement géographique (moyenne 128,5 km) \\
+year\_unknown & Binaire si year = 0 & Donnée manquante informative \\
+tsh\_is\_zero & Binaire si TSH = 0 & Pompe gravitaire vs imputation \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Encodage catégoriel (au moment de l'entraînement S3)}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Type & Colonnes & Encodage & Modèles \\
+\midrule
+Faible cardinalité & basin, water\_quality, payment… & OneHotEncoder & Tous \\
+Haute cardinalité & funder, installer, extraction\_type, region & OrdinalEncoder & RF, XGBoost \\
+Numériques & 15 + 2 binaires & StandardScaler (LR, KNN) / none (arbres) / MinMax (DL) & Selon modèle \\
+\bottomrule
+\end{longtable}
+}
+
+Les CSV nettoyés conservent les catégories en texte ; l'encodage est branché dans \texttt{build\_encoder()} à l'entraînement.
+
+\subsection{Résultats finaux S2}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur \\
+\midrule
+Lignes train & 59 400 \\
+Features modèle & 26 \\
+NaN restants & \textbf{0} \\
+Tests unitaires & \textbf{13/13} \\
+year\_unknown = 1 & 20 709 (34,9 \%) \\
+tsh\_is\_zero = 1 & 41 639 (70,1 \%) \\
+pump\_age moyen & 26,6 ans \\
+dist\_to\_basin\_center moyen & 128,5 km \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Ordre des opérations pipeline}
+
+\begin{lstlisting}
+
+\_fix\_gps $\rightarrow$ \_fix\_construction\_year $\rightarrow$ \_fix\_gps\_height $\rightarrow$ \_fix\_funder\_installer
+$\rightarrow$ \_fix\_amount\_tsh $\rightarrow$ \_engineer\_features $\rightarrow$ \_encode\_binary $\rightarrow$ \_drop\_columns
+
+\end{lstlisting}
+
+GPS corrigé \textbf{avant} dist\_to\_basin\_center ; flags créés \textbf{avant} imputations.
+
+\clearpage
+
+\chapter[Sprint 3]{Sprint 3 : Machine Learning classique}
+
+\label{ch:sprint3}
+
+\subsection{Objectif}
+
+Entraîner et comparer 4 baselines + GridSearch RF/XGB, établir la référence avant le Deep Learning, atteindre recall needs repair $\geq$ 0,65.
+
+\subsection{Protocole expérimental}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Paramètre & Valeur \\
+\midrule
+Données & data/cleaned/train\_clean.csv \\
+Features & 26 (PumpPreprocessor.get\_feature\_columns()) \\
+Split & 80/20 stratifié, random\_state=42 $\rightarrow$ 47 520 train / 11 880 test \\
+Métrique principale & F1-Macro \\
+Métrique métier & Recall functional needs repair \\
+CV & 5-fold stratifiée sur le train \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Modèles et gestion du déséquilibre}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Modèle & Stratégie déséquilibre \\
+\midrule
+Logistic Regression & class\_weight='balanced' \\
+Random Forest & class\_weight='balanced' \\
+KNN & Aucune (baseline géométrique) \\
+XGBoost & sample\_weight balanced \\
+Recall boost & SMOTE (k=5) + seuil calibré sur hold-out 20 \% train \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Encodage XGBoost :} wrapper \texttt{XGBStringLabelPipeline} car XGBoost 3.x n'accepte pas labels string avec sample\_weight.
+
+\subsection{Résultats : baselines + GridSearch}
+
+{\small
+\begin{longtable}{@{}llllll@{}}
+\toprule
+\rowcolor{EHTPTableHead}Modèle & F1-Macro & F1 needs repair & Recall needs repair & Accuracy & ROC-AUC \\
+\midrule
+\textbf{random\_forest\_tuned} 🏆 F1 & \textbf{0,6658} & 0,425 & 0,484 & 0,759 & 0,872 \\
+xgboost\_tuned & 0,6570 & 0,434 & 0,642 & 0,734 & 0,877 \\
+xgboost & 0,6554 & 0,435 & 0,638 & 0,732 & 0,873 \\
+knn & 0,6232 & 0,348 & 0,284 & 0,744 & 0,824 \\
+logistic\_regression & 0,4773 & 0,247 & 0,555 & 0,537 & 0,724 \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{GridSearch hyperparamètres retenus :}
+
+\begin{lstlisting}
+
+\# RF (plateau : défauts optimaux)
+\{'clf\_\_max\_depth': None, 'clf\_\_max\_features': 'sqrt', 'clf\_\_min\_samples\_leaf': 1\}
+
+\# XGBoost
+\{'clf\_\_colsample\_bytree': 0.8, 'clf\_\_learning\_rate': 0.1,
+ 'clf\_\_max\_depth': 8, 'clf\_\_subsample': 0.8\}
+
+\end{lstlisting}
+
+\subsection{Analyse par classe : RF champion F1}
+
+{\small
+\begin{longtable}{@{}lllll@{}}
+\toprule
+\rowcolor{EHTPTableHead}Classe & Precision & Recall & F1 & Support test \\
+\midrule
+functional & 0,81 & 0,79 & 0,80 & 6 452 \\
+functional needs repair & 0,38 & 0,48 & 0,43 & 863 \\
+non functional & 0,78 & 0,77 & 0,77 & 4 565 \\
+\bottomrule
+\end{longtable}
+}
+
+Seulement \textbf{418/863} pompes needs repair correctement identifiées par le RF : d'où la passe recall boost.
+
+\subsection{Visualisations}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{sprint_03_confusion_matrices.png}
+
+\caption{Matrices de confusion : 4 modèles ML}
+
+\end{figure}
+
+\textit{RF confond souvent needs repair avec functional. XGBoost détecte mieux la classe minoritaire mais avec plus de faux positifs.}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{sprint_03_feature_importance.png}
+
+\caption{Feature importance : RF vs XGBoost}
+
+\end{figure}
+
+\textit{Variables influentes : age\_years, amount\_tsh, longitude/latitude, installer, funder, extraction\_type : cohérent avec l'intuition métier.}
+
+\subsection{Recall boost : critère métier atteint}
+
+Commande : \texttt{python -m src.train recall}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Variante & F1-Macro & Recall needs repair & Seuil \\
+\midrule
+\textbf{xgboost\_smote\_threshold} 🏆 & 0,6289 & \textbf{0,6952} & 0,16 \\
+xgboost\_threshold & 0,6392 & 0,6709 & 0,34 \\
+random\_forest\_smote\_threshold & 0,6317 & 0,6466 & 0,16 \\
+xgboost\_smote (sans seuil) & 0,6538 & 0,4519 & / \\
+random\_forest\_smote & 0,6511 & 0,3975 & / \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Enseignements :}
+
+1. SMOTE seul ne suffit pas : recall baisse pour XGB (0,45)
+
+2. Le \textbf{seuil calibré} est la clé
+
+3. Champion métier : \texttt{champion\_recall\_v1.joblib} : détecte \textasciitilde{}70 \% des pompes à réparer
+
+\subsection{Constats S3}
+
+1. Plafond \textasciitilde{}0,67 F1-Macro en ML classique sur Pump It Up : cohérent littérature
+
+2. Conflit F1-Macro vs recall $\rightarrow$ deux champions distincts
+
+3. LR inadaptée (F1 = 0,48) : conservée comme baseline interprétable
+
+4. KNN : recall needs repair très faible (0,28)
+
+5. F1 cible 0,72 reporté au S4 (DL)
+
+\clearpage
+
+\chapter[Sprint 4]{Sprint 4 : Deep Learning et comparaison ML/DL}
+
+\label{ch:sprint4}
+
+\subsection{Objectif}
+
+Tester si le Deep Learning dépasse le plafond \textasciitilde{}0,67 F1-Macro du ML et atteint F1 $\geq$ 0,72, tout en gardant recall $\geq$ 0,65.
+
+\subsection{Protocole}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Paramètre & Valeur \\
+\midrule
+Features DL & 64 dimensions (MinMax + OHE + Ordinal) \\
+Split & 80/20 stratifié, random\_state=42 \\
+Architectures & MLP baseline, ResidualMLP, 1D-CNN, grid 9 configs \\
+Class weights & \{0: 0.614, 1: 4.586, 2: 0.868\} \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Résultats : toutes architectures DL}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Architecture & F1-Macro & Recall needs repair & Accuracy \\
+\midrule
+\textbf{mlp\_l2\_0.001} 🏆 DL & \textbf{0.5410} & 0.603 & 0.610 \\
+mlp\_baseline & 0.5297 & 0.567 & 0.604 \\
+residual\_mlp & 0.5276 & 0.302 & 0.634 \\
+mlp\_l2\_0.0 & 0.5272 & 0.575 & 0.598 \\
+cnn1d & 0.4113 & 0.226 & 0.507 \\
+mlp\_tuned (grid) & 0.3817 & \textbf{0.930} & 0.380 \\
+\bottomrule
+\end{longtable}
+}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{sprint_04_training_history.png}
+
+\caption{Courbes entraînement MLP}
+
+\end{figure}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{sprint_04_confusion_matrix.png}
+
+\caption{Matrice confusion MLP baseline}
+
+\end{figure}
+
+\subsection{Comparaison ML (S3) vs DL (S4)}
+
+{\small
+\begin{longtable}{@{}lllll@{}}
+\toprule
+\rowcolor{EHTPTableHead}Modèle & Type & F1-Macro & Recall needs repair & Accuracy \\
+\midrule
+RF tuned 🏆 F1 ML & ML & \textbf{0.6658} & 0.484 & 0.759 \\
+XGB SMOTE+seuil 🏆 métier & ML & 0.6289 & \textbf{0.695} & 0.714 \\
+mlp\_l2\_0.001 & DL & 0.5410 & 0.603 & 0.610 \\
+cnn1d & DL & 0.4113 & 0.226 & 0.507 \\
+\bottomrule
+\end{longtable}
+}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Écart & Delta \\
+\midrule
+Meilleur DL vs RF (F1) & \textbf{−0,125} \\
+Meilleur DL vs XGB recall boost (recall) & \textbf{−0,093} \\
+Gain tuning vs baseline MLP & \textbf{+0,011} F1 seulement \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Pourquoi le DL n'a pas battu le ML ?}
+
+1. \textbf{Données tabulaires structurées} : RF/XGB exploitent nativement seuils et interactions ; MLP doit tout apprendre depuis 64 entrées encodées différemment
+
+2. \textbf{Tuning négligeable} : +0,01 F1 après \textasciitilde{}1 h GPU
+
+3. \textbf{Grid search piège} : recall 93–98 \% mais accuracy 38 \% (non déployable) ; le ML résout mieux via SMOTE + seuil calibré
+
+4. \textbf{Encodage DL ≠ encodage ML} : pipeline S2/S3 optimisé pour les arbres depuis le wrangling
+
+5. \textbf{Résultat classique} en ML tabulaire : preuve expérimentale rigoureuse, pas un échec technique
+
+\textbf{Verdict S4 :} hypothèse « DL > ML » \textbf{non confirmée}. Champion production = \textbf{ML}.
+
+\clearpage
+
+\chapter[Sprint 5]{Sprint 5 : Arbitrage et modèles champions}
+
+\label{ch:sprint5}
+
+\subsection{Objectif}
+
+Sélectionner le modèle de production, tester Soft Voting RF+XGB, produire la fiche modèle (Model Card).
+
+\subsection{Soft Voting RF + XGB (nouveauté S5)}
+
+Moyenne des probabilités de \texttt{random\_forest\_tuned} et \texttt{xgboost\_tuned} :
+
+{\small
+\begin{longtable}{@{}lllll@{}}
+\toprule
+\rowcolor{EHTPTableHead}Modèle & F1-Macro & Recall needs repair & Accuracy & ROC-AUC \\
+\midrule
+RF tuned (seul) & 0,6537 & 0,315 & 0,772 & 0,872 \\
+XGB tuned (seul) & 0,6570 & 0,642 & 0,734 & 0,877 \\
+\textbf{Voting RF+XGB} 🏆 F1 & \textbf{0.6787} & 0,486 & 0,770 & \textbf{0,887} \\
+XGB SMOTE + seuil 0.17 🏆 recall & 0,6295 & \textbf{0,6848} & 0,705 & 0,870 \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Gain voting :} +0,022 F1-Macro vs XGB seul. Le voting améliore le F1 global mais \textbf{n'atteint pas} le recall métier seul (0,49 vs 0,68).
+
+\subsection{Tableau comparatif global (extrait)}
+
+{\small
+\begin{longtable}{@{}lllll@{}}
+\toprule
+\rowcolor{EHTPTableHead}Modèle & Type & F1-Macro & Recall NR & Accuracy \\
+\midrule
+voting\_rf\_xgb\_soft & ML S5 & \textbf{0,6787} & 0,486 & 0,770 \\
+random\_forest\_tuned & ML S3 & 0,6658 & 0,484 & 0,759 \\
+xgboost\_tuned & ML S3 & 0,6570 & 0,642 & 0,734 \\
+xgboost\_smote\_threshold & ML S3/S5 & 0,6295 & \textbf{0,6848} & 0,705 \\
+mlp\_l2\_0.001 & DL S4 & 0,5410 & 0,603 & 0,610 \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Décision de production}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Priorité & Modèle & Fichier & Métrique clé \\
+\midrule
+\textbf{Alertes terrain Maroc} & XGB SMOTE + seuil 0,17 & champion\_recall\_v1.joblib & Recall \textbf{0,685} \\
+\textbf{Analytics / F1 global} & Soft Voting RF+XGB & voting\_rf\_xgb\_v1.joblib & F1-Macro \textbf{0,679} \\
+\textbf{Alias déploiement MQTT/dashboard} & = recall champion & champion\_production\_v1.joblib & / \\
+\textbf{Deep Learning} & Exclu & mlp\_l2\_0.001.keras & Référence uniquement \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Pourquoi deux modèles ?} Conflit métrique documenté depuis S3 : maximiser F1-Macro sous-détecte needs repair (7 \%) ; maximiser recall augmente les faux positifs (précision \textasciitilde{}0,29). Deux usages légitimes, pas un échec de méthode.
+
+\subsection{Model Card : synthèse}
+
+\textbf{Champion alertes : performances test :}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur & Cible \\
+\midrule
+Recall needs repair & \textbf{0,6848} & $\geq$ 0,65 Oui \\
+F1-Macro & 0,6295 & $\geq$ 0,72 Non \\
+F1 needs repair & 0,394 & / \\
+Accuracy & 0,705 & / \\
+ROC-AUC macro OvR & 0,870 & / \\
+Latence & \textasciitilde{}0,02 ms/échantillon & / \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Champion F1 : performances test :}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur & Cible \\
+\midrule
+F1-Macro & \textbf{0,6787} & $\geq$ 0,72 Non \\
+Recall needs repair & 0,4855 & $\geq$ 0,65 Non \\
+Accuracy & 0,770 & / \\
+ROC-AUC macro OvR & 0,887 & / \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Facteurs influents :} age\_years, amount\_tsh, longitude, latitude, installer, funder, extraction\_type, management.
+
+\textbf{Risques d'usage inapproprié :}
+
+\begin{itemize}
+
+\item Ne pas déployer le DL (F1 \textasciitilde{}0,54)
+
+\item Ne pas attendre haute précision avec le champion recall : privilégier le rappel
+
+\item Re-calibrer le seuil si changement de distribution (nouveau pays)
+
+\end{itemize}
+
+\clearpage
+
+\chapter[Sprint 6]{Sprint 6 : Simulation IoT MQTT}
+
+\label{ch:sprint6}
+
+\subsection{Objectif}
+
+Passer du modèle offline (CSV batch) à un pipeline quasi temps réel : broker MQTT, simulateur 50 pompes, consumer inférence, persistance SQLite pour le dashboard.
+
+\subsection{Architecture}
+
+\begin{lstlisting}
+
+flowchart LR
+    SIM["src/simulator.py\textbackslash\{\}n50 pompes ,  3 scénarios"]
+    MOSQ["Mosquitto 127.0.0.1:1883"]
+    CONS["src/mqtt\_consumer.py\textbackslash\{\}nchampion\_production\_v1.joblib"]
+    DB[("data/mqtt/aquasense.db")]
+    SIM -->|"aquasense/\{id\}/telemetry"| MOSQ
+    MOSQ --> CONS
+    CONS --> DB
+    CONS -->|"aquasense/\{id\}/prediction"| MOSQ
+
+\end{lstlisting}
+
+\subsection{Topics et payloads}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Direction & Topic & Format \\
+\midrule
+Simulateur $\rightarrow$ Broker & aquasense/\{pump\_id\}/telemetry & JSON \\
+Consumer $\rightarrow$ Broker & aquasense/\{pump\_id\}/prediction & JSON \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Exemple télémétrie :}
+
+\begin{lstlisting}
+
+\{
+  "pump\_id": "pump\_011",
+  "timestamp": "2026-06-19T08:30:00+00:00",
+  "pressure": 4.18,
+  "vibration": 0.052,
+  "flow": 10.2,
+  "scenario": "degradation",
+  "month": 6,
+  "sim\_day": 3.5
+\}
+
+\end{lstlisting}
+
+\textbf{Exemple prédiction :}
+
+\begin{lstlisting}
+
+\{
+  "pump\_id": "pump\_011",
+  "prediction": "functional needs repair",
+  "confidence": 0.76,
+  "health\_index": 0.91,
+  "latency\_ms": 24.2,
+  "buffer\_size": 15
+\}
+
+\end{lstlisting}
+
+\subsection{Composants implémentés}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Fichier & Rôle \\
+\midrule
+src/mqtt\_config.py & Variables .env \\
+src/pump\_registry.py & 50 profils ML depuis train\_clean.csv \\
+src/mqtt\_features.py & Fusion profil statique + télémétrie agrégée \\
+src/simulator.py & Publisher 3 scénarios + saison sèche \\
+src/mqtt\_consumer.py & Subscriber + inférence + SQLite \\
+src/mqtt\_db.py & Tables telemetry, predictions \\
+scripts/test\_mqtt\_e2e.py & Test bout en bout \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Scénarios de simulation}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Scénario & \textasciitilde{}Répartition & Comportement \\
+\midrule
+healthy & 60 \% (31/50) & pressure \textasciitilde{} N(4.2,0.1), vibration \textasciitilde{} N(0.05,0.01), flow \textasciitilde{} N(12,0.5) \\
+degradation & 25 \% (12/50) & Baisse sur 14 j simulés : −0.3 bar/j, +0.02 g/j, −0.5 L/min/j \\
+failure & 15 \% (7/50) & pressure=0, flow=0, vibrations erratiques \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Saison sèche Maroc :} mois 6–9 $\rightarrow$ débit réduit de 15 \% (DRY\_FLOW\_FACTOR = 0.85).
+
+\textbf{Accélération :} SIM\_SECONDS\_PER\_DAY=60 $\rightarrow$ 1 min réelle = 1 jour simulé.
+
+\subsection{Stratégie hybride profil ML + télémétrie}
+
+Le modèle S5 a été entraîné sur des \textbf{fiches d'enquête} (26 features tabulaires), pas sur capteurs IoT bruts. Le consumer applique :
+
+1. \textbf{Profil statique} : métadonnées échantillonnées depuis train\_clean.csv
+
+2. \textbf{Télémétrie agrégée} (buffer 30 messages) : modulateurs sur amount\_tsh (proxy débit) et gps\_height (proxy pression)
+
+3. \textbf{health\_index} (0–1) : indicateur capteur pour le dashboard, indépendant de la prédiction ML
+
+\subsection{Résultats test 50 pompes}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_mqtt_consumer.png}
+
+\caption{Consumer MQTT}
+
+\end{figure}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_mqtt_simulator.png}
+
+\caption{Simulateur 50 pompes}
+
+\end{figure}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur \\
+\midrule
+Pompes traitées (1er cycle) & \textbf{50/50} \\
+Latence inférence & \textbf{22-70 ms} \\
+Alertes needs repair & \textbf{5} (pump\_011, 021, 027, 029, 043) \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Cohérence capteurs vs ML documentée :} pump\_002 peut être functional malgré health=0.00 (failure capteur + profil ML dominant) : le modèle tabulaire ne remplace pas un modèle entraîné sur capteurs réels.
+
+\subsection{Schéma SQLite}
+
+\textbf{Table telemetry :} pump\_id, timestamp, pressure, vibration, flow, scenario, month, sim\_day
+
+\textbf{Table predictions :} pump\_id, timestamp, prediction, confidence, health\_index, proba\_json, latency\_ms
+
+\subsection{Reproduction MQTT}
+
+\begin{lstlisting}
+
+winget install EclipseFoundation.Mosquitto
+copy .env.example .env
+py -3.10 -m src.mqtt\_consumer    \# terminal 1
+py -3.10 -m src.simulator        \# terminal 2
+
+\end{lstlisting}
+
+\clearpage
+
+\chapter[Sprint 7]{Sprint 7 : Dashboard de supervision}
+
+\label{ch:sprint7}
+
+\subsection{Objectif}
+
+Interface Streamlit de supervision : KPIs, carte Maroc, alertes, détail pompe, comparaison modèles. Source : \texttt{data/mqtt/aquasense.db}, auto-refresh \textbf{10 s}.
+
+\subsection{Architecture}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Composant & Fichier & Rôle \\
+\midrule
+Interface & dashboard/app.py & 5 pages, thème AquaSense \\
+Données & dashboard/data.py & Fusion profils + SQLite + MOROCCO\_SITES \\
+Thème & dashboard/theme.py, .streamlit/config.toml & Palette eau / bleu \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Les 5 pages}
+
+1. \textbf{Vue d'ensemble} : KPIs, carte, donut, alertes prioritaires
+
+2. \textbf{Alertes} : file maintenance, assignation technicien (démo)
+
+3. \textbf{Détail pompe} : télémétrie + prédiction + latence
+
+4. \textbf{Modèles} : tableau S3–S5 + radar top 6
+
+5. \textbf{À propos} : pipeline S6, métriques SQLite
+
+\subsection{Captures probantes (session \textasciitilde{}107 578 messages MQTT)}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_dashboard_overview.png}
+
+\caption{Vue d'ensemble}
+
+\end{figure}
+
+\textit{50 pompes ,  carte Maroc ,  48 \% / 10 \% / 42 \% ,  5 alertes.}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_dashboard_alerts.png}
+
+\caption{Panel alertes}
+
+\end{figure}
+
+\textit{5 pompes needs repair ,  assignation technicien.}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_dashboard_pump.png}
+
+\caption{Détail pompe}
+
+\end{figure}
+
+\textit{pump\_003 ,  confiance 94 \% ,  latence 51 ms ,  courbes pression/débit.}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_dashboard_models1.png}
+
+\caption{Modèles partie 1}
+
+\end{figure}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_dashboard_models2.png}
+
+\caption{Modèles partie 2 : radar}
+
+\end{figure}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_dashboard_about.png}
+
+\caption{À propos pipeline}
+
+\end{figure}
+
+\subsection{Synthèse métriques dashboard}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur \\
+\midrule
+Pompes suivies & 50 \\
+Opérationnelles & 24 \\
+Maintenance requise & 5 \\
+Hors service & 21 \\
+Messages MQTT en base & 107 578 \\
+Inférences enregistrées & 107 577 \\
+Latence moyenne & \textasciitilde{}34 ms \\
+Modèle production & champion\_production\_v1.joblib \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Carte Maroc : clarification}
+
+Les positions affichées utilisent \textbf{MOROCCO\_SITES} : 50 localités rurales marocaines réelles (noms de douars/communes) pour la \textbf{démo visuelle}. Les profils ML et l'inférence restent sur le proxy Tanzanie. La carte est un habillage géographique pour la présentation, \textbf{pas} un transfert géospatial du modèle.
+
+\clearpage
+
+\chapter[Sprint 8]{Sprint 8 : Tests et validation}
+
+\label{ch:sprint8}
+
+\subsection{Objectif}
+
+Valider automatiquement preprocessing, simulateur, consumer, dashboard, intégration MQTT live.
+
+\subsection{Résultats pytest}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Métrique & Valeur \\
+\midrule
+Tests totaux & \textbf{37} \\
+Réussis & \textbf{37} (100 \%) \\
+Offline & 35 \\
+Intégration MQTT & 2 \\
+\bottomrule
+\end{longtable}
+}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_pytest_all.png}
+
+\caption{pytest 37 passed}
+
+\end{figure}
+
+\begin{figure}[htbp]
+
+\centering
+
+\includegraphics[width=0.92\linewidth]{image/fig_pytest_mqtt.png}
+
+\caption{pytest intégration MQTT}
+
+\end{figure}
+
+\subsection{Couverture par fichier}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Fichier & Tests & Valide \\
+\midrule
+test\_preprocessing.py & 13 & GPS, year, TSH, pipeline complet \\
+test\_mqtt\_features.py & 6 & health\_index, build\_feature\_row \\
+test\_simulator.py & 5 & healthy, degradation, failure, saison sèche \\
+test\_mqtt\_consumer.py & 6 & inférence, 50 pompes, recall, erreurs \\
+test\_dashboard\_data.py & 5 & carte Maroc, 50 pompes, 5 alertes \\
+test\_mqtt\_integration.py & 2 & broker live + consumer E2E \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Scénarios S8-01 à S8-06}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}ID & Scénario & Résultat \\
+\midrule
+S8-01 & Pompe saine & Oui Capteurs normaux, inférence OK \\
+S8-02 & Dégradation 14 j & Oui Pression/débit baissent \\
+S8-03 & Panne soudaine < 5 s & Oui Pression/débit = 0 \\
+S8-04 & Charge 50 pompes & Oui 50/50 sans perte \\
+S8-05 & Recall maintenance & Oui $\geq$ 3/5 alertes détectées \\
+S8-06 & Latence < 500 ms & Oui \\
+\bottomrule
+\end{longtable}
+}
+
+\textbf{Note intégration :} préfixe MQTT isolé \texttt{aquasense\_s8test\_*} pour ne pas interférer avec un pipeline production sur \texttt{aquasense/}.
+
+\chapter{Limites, biais et perspectives}
+
+\subsection{Limites assumées}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
+\toprule
+\# & Limite & Impact & Atténuation \\
+\midrule
+1 & Géographie : modèle entraîné GPS Tanzanie & Transfert Maroc imparfait & Ré-entraînement ONEE/ABH \\
+2 & Nappe vs pompe : pas de piézométrie/salinité & Enjeux hydriques marocains non couverts & Capteurs niveau/conductivité \\
+3 & Données institutionnelles non intégrées & Écart domaine réel/proxy & Partenariat SNIE \\
+4 & IoT simulé : pas de capteurs physiques & Télémétrie fictive & Pilote terrain \\
+5 & Carte dashboard : positions démo Maroc & Affichage ≠ géolocalisation ML & Documenté explicitement \\
+6 & F1-Macro 0,72 non atteint & −0,04 vs cible scientifique & Voting pour analytics ; plafond dataset \\
+7 & sklearn 1.7.2 pickled, runtime 1.9.0 & Warning version & Re-export modèle recommandé \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Biais du modèle}
+
+\begin{itemize}
+
+\item \textbf{Sur-détection} needs repair avec champion recall (précision \textasciitilde{}0,29) : acceptable pour maintenance préventive au Maroc
+
+\item \textbf{Classe minoritaire} 7 \% : métriques instables sans SMOTE/seuil
+
+\item \textbf{Écart capteurs/ML} : health\_index et prédiction ML peuvent diverger (documenté S6)
+
+\end{itemize}
+
+\subsection{Perspectives Maroc}
+
+1. Partenariat ABH / ONEE pour fiches points d'eau et piézométrie
+
+2. Intégration au SNIE (Système national d'information sur l'eau)
+
+3. Capteurs réels : débit, pression, niveau, conductivité (salinité)
+
+4. Fine-tuning du champion sur données nationales
+
+5. Déploiement edge (Raspberry Pi + TFLite) : exploré S4, non retenu
+
+\chapter{Conclusion}
+
+\textbf{AquaSense AI} démontre la faisabilité d'un pipeline complet de maintenance prédictive pour les points d'eau, de l'entraînement ML à la supervision opérationnelle via MQTT et dashboard. Le projet répond à une problématique marocaine concrète en s'appuyant sur un dataset proxy international reproductible.
+
+\textbf{Résultats clés :}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Résultat & Valeur & Signification \\
+\midrule
+Recall needs repair & \textbf{0,685} & Objectif métier atteint : on détecte \textasciitilde{}68 \% des pompes dégradées \\
+F1-Macro & \textbf{0,679} & Performance globale équitable sur 3 classes, légèrement sous 0,72 \\
+ML vs DL & ML +0,14 F1 & Le DL n'est pas nécessaire sur données tabulaires ici \\
+Latence MQTT & \textbf{22-70 ms} & Temps réel validé \\
+Tests & \textbf{37/37} & Reproductibilité automatisée \\
+\bottomrule
+\end{longtable}
+}
+
+Le travail ouvre la voie à un déploiement pilote dès l'accès à des données nationales labellisées, en réutilisant l'architecture MQTT, le consumer et le dashboard sans refonte majeure.
+
+\textbf{Phrase finale :}
+
+\begin{quote}
+
+\textit{AquaSense AI répond à la problématique marocaine de maintenance des forages et points d'eau en zone rurale. Le pipeline prédictif est développé et benchmarké sur Pump It Up, retenu pour sa richesse, ses labels et sa reproductibilité, en vue d'un déploiement futur sur des données nationales (ONEE, ABH, SNIE).}
+
+\end{quote}
+
+\chapter{Références et reproduction}
+
+\subsection{Références}
+
+1. DrivenData : Pump It Up: Data Mining the Water Table : <https://www.drivendata.org/competitions/7/>
+
+2. scikit-learn : User Guide, Metrics and scoring
+
+3. Cours Machine Learning, EHTP, Dr. Rym Nassih
+
+4. Open data Maroc (eau) : <https://www.data.gov.ma/data/fr/dataset/?tags=eau>
+
+\subsection{Reproduction complète}
+
+\begin{lstlisting}
+
+git clone https://github.com/Traorehub/aquasense-ai.git
+cd aquasense-ai
+python -m venv .venv
+.\textbackslash\{\}.venv\textbackslash\{\}Scripts\textbackslash\{\}Activate.ps1
+pip install -r requirements.txt
+python scripts/download\_data.py
+python src/preprocessing.py
+python -m src.train
+python -m src.train recall
+python -m src.train final
+pytest tests/ -v
+\# MQTT (3 terminaux)
+python -m src.mqtt\_consumer
+python -m src.simulator
+python -m streamlit run dashboard/app.py
+
+\end{lstlisting}
+
+\subsection{Fichiers modèles finaux}
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.45\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
+\toprule
+\rowcolor{EHTPTableHead}Fichier & Rôle \\
+\midrule
+champion\_production\_v1.joblib & Production MQTT + dashboard (recall) \\
+champion\_recall\_v1.joblib & Alertes needs repair \\
+voting\_rf\_xgb\_v1.joblib & Analytics F1-Macro \\
+rf\_best\_v1.joblib, xgb\_best\_v1.joblib & Composants voting \\
+mlp\_l2\_0.001.keras & Référence DL uniquement \\
+\bottomrule
+\end{longtable}
+}
+
+\textit{Rapport rédigé par TRAORE Fanogo Mohamed \textbackslash\{\}\& NADAHE Mohamed ,  Projet ML EHTP ,  Juin 2026}
+\end{document}

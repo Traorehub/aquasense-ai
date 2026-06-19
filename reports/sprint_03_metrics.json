@@ -44,7 +44,7 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.73      0.51      0.60      6452\nfunctional needs repair       0.16      0.56      0.25       863\n         non functional       0.60      0.57      0.58      4565\n\n               accuracy                           0.54     11880\n              macro avg       0.50      0.55      0.48     11880\n           weighted avg       0.64      0.54      0.57     11880\n",
-        "latency_ms_per_sample": 0.002779537035381227,
+        "latency_ms_per_sample": 0.010971473063973875,
         "n_test": 11880
       },
       "cv_f1_macro": {
@@ -86,7 +86,7 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.76      0.84      0.80      6452\nfunctional needs repair       0.45      0.28      0.35       863\n         non functional       0.76      0.69      0.72      4565\n\n               accuracy                           0.74     11880\n              macro avg       0.66      0.61      0.62     11880\n           weighted avg       0.74      0.74      0.74     11880\n",
-        "latency_ms_per_sample": 0.37029784511877084,
+        "latency_ms_per_sample": 0.551918451178453,
         "n_test": 11880
       },
       "cv_f1_macro": {
@@ -128,7 +128,7 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.79      0.80      6452\nfunctional needs repair       0.38      0.48      0.43       863\n         non functional       0.78      0.77      0.77      4565\n\n               accuracy                           0.76     11880\n              macro avg       0.66      0.68      0.67     11880\n           weighted avg       0.77      0.76      0.76     11880\n",
-        "latency_ms_per_sample": 0.03258968855190461,
+        "latency_ms_per_sample": 0.02443784511784261,
         "n_test": 11880
       },
       "cv_f1_macro": {
@@ -170,7 +170,7 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.74      0.78      6452\nfunctional needs repair       0.33      0.64      0.43       863\n         non functional       0.78      0.73      0.75      4565\n\n               accuracy                           0.73     11880\n              macro avg       0.64      0.70      0.66     11880\n           weighted avg       0.76      0.73      0.74     11880\n",
-        "latency_ms_per_sample": 0.01438858585964468,
+        "latency_ms_per_sample": 0.01557441919192096,
         "n_test": 11880
       },
       "cv_f1_macro": {
@@ -193,7 +193,7 @@
         },
         "recall_needs_repair": 0.4843568945538818,
         "accuracy": 0.7585858585858586,
-        "roc_auc_macro_ovr": 0.8723538788564866,
+        "roc_auc_macro_ovr": 0.8723540311440825,
         "confusion_matrix": [
           [
             5094,
@@ -212,7 +212,7 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.79      0.80      6452\nfunctional needs repair       0.38      0.48      0.43       863\n         non functional       0.78      0.77      0.77      4565\n\n               accuracy                           0.76     11880\n              macro avg       0.66      0.68      0.67     11880\n           weighted avg       0.77      0.76      0.76     11880\n",
-        "latency_ms_per_sample": 0.03593542929311512,
+        "latency_ms_per_sample": 0.039045176767672655,
         "n_test": 11880
       },
       "best_params": {
@@ -259,7 +259,7 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.75      0.78      6452\nfunctional needs repair       0.33      0.64      0.43       863\n         non functional       0.78      0.73      0.76      4565\n\n               accuracy                           0.73     11880\n              macro avg       0.64      0.71      0.66     11880\n           weighted avg       0.77      0.73      0.75     11880\n",
-        "latency_ms_per_sample": 0.017424974745270397,
+        "latency_ms_per_sample": 0.018911144781139547,
         "n_test": 11880
       },
       "best_params": {
@@ -281,8 +281,8 @@
       "f1_needs_repair": 0.4250127097102186,
       "recall_needs_repair": 0.4843568945538818,
       "accuracy": 0.7585858585858586,
-      "roc_auc": 0.8723538788564866,
-      "latency_ms": 0.03593542929311512
+      "roc_auc": 0.8723540311440825,
+      "latency_ms": 0.039045176767672655
     },
     {
       "model": "random_forest",
@@ -291,7 +291,7 @@
       "recall_needs_repair": 0.4843568945538818,
       "accuracy": 0.7585858585858586,
       "roc_auc": 0.8723538788564866,
-      "latency_ms": 0.03258968855190461
+      "latency_ms": 0.02443784511784261
     },
     {
       "model": "xgboost_tuned",
@@ -300,7 +300,7 @@
       "recall_needs_repair": 0.641946697566628,
       "accuracy": 0.7342592592592593,
       "roc_auc": 0.8773769550816316,
-      "latency_ms": 0.017424974745270397
+      "latency_ms": 0.018911144781139547
     },
     {
       "model": "xgboost",
@@ -309,7 +309,7 @@
       "recall_needs_repair": 0.6384704519119351,
       "accuracy": 0.7319023569023569,
       "roc_auc": 0.8731313612114696,
-      "latency_ms": 0.01438858585964468
+      "latency_ms": 0.01557441919192096
     },
     {
       "model": "knn",
@@ -318,7 +318,7 @@
       "recall_needs_repair": 0.28389339513325607,
       "accuracy": 0.7436026936026936,
       "roc_auc": 0.8237601196663021,
-      "latency_ms": 0.37029784511877084
+      "latency_ms": 0.551918451178453
     },
     {
       "model": "logistic_regression",
@@ -327,7 +327,7 @@
       "recall_needs_repair": 0.5550405561993047,
       "accuracy": 0.5367003367003367,
       "roc_auc": 0.7242779981005055,
-      "latency_ms": 0.002779537035381227
+      "latency_ms": 0.010971473063973875
     }
   ],
   "champion": "random_forest_tuned"

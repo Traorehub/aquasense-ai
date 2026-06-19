@@ -6,39 +6,39 @@
   "sprint5_models": {
     "random_forest_tuned": {
       "metrics": {
-        "f1_macro": 0.6537055983082088,
+        "f1_macro": 0.6657959864710662,
         "f1_per_class": {
-          "functional": 0.8169559710943902,
-          "functional needs repair": 0.37517241379310345,
-          "non functional": 0.7689884100371329
+          "functional": 0.8011953444479396,
+          "functional needs repair": 0.4250127097102186,
+          "non functional": 0.7711799052550402
         },
         "recall_per_class": {
-          "functional": 0.8498140111593304,
-          "functional needs repair": 0.31517960602549244,
-          "non functional": 0.7485213581599124
+          "functional": 0.7895226286422815,
+          "functional needs repair": 0.4843568945538818,
+          "non functional": 0.7667031763417306
         },
-        "recall_needs_repair": 0.31517960602549244,
-        "accuracy": 0.7720538720538721,
-        "roc_auc_macro_ovr": 0.8720654755041215,
+        "recall_needs_repair": 0.4843568945538818,
+        "accuracy": 0.7585858585858586,
+        "roc_auc_macro_ovr": 0.8723538788564866,
         "confusion_matrix": [
           [
-            5483,
-            217,
-            752
+            5094,
+            489,
+            869
           ],
           [
-            438,
-            272,
-            153
+            302,
+            418,
+            143
           ],
           [
-            1050,
-            98,
-            3417
+            868,
+            197,
+            3500
           ]
         ],
-        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.79      0.85      0.82      6452\nfunctional needs repair       0.46      0.32      0.38       863\n         non functional       0.79      0.75      0.77      4565\n\n               accuracy                           0.77     11880\n              macro avg       0.68      0.64      0.65     11880\n           weighted avg       0.76      0.77      0.77     11880\n",
-        "latency_ms_per_sample": 0.02021056397119145,
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.79      0.80      6452\nfunctional needs repair       0.38      0.48      0.43       863\n         non functional       0.78      0.77      0.77      4565\n\n               accuracy                           0.76     11880\n              macro avg       0.66      0.68      0.67     11880\n           weighted avg       0.77      0.76      0.76     11880\n",
+        "latency_ms_per_sample": 0.10352618686836416,
         "n_test": 11880
       }
     },
@@ -76,96 +76,96 @@
           ]
         ],
         "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.75      0.78      6452\nfunctional needs repair       0.33      0.64      0.43       863\n         non functional       0.78      0.73      0.76      4565\n\n               accuracy                           0.73     11880\n              macro avg       0.64      0.71      0.66     11880\n           weighted avg       0.77      0.73      0.75     11880\n",
-        "latency_ms_per_sample": 0.017758872053665907,
+        "latency_ms_per_sample": 0.01940296296310934,
         "n_test": 11880
       }
     },
     "voting_rf_xgb_soft": {
       "metrics": {
-        "f1_macro": 0.6787148532742999,
+        "f1_macro": 0.6709989185219726,
         "f1_per_class": {
-          "functional": 0.8127496159754224,
-          "functional needs repair": 0.44645711241342567,
-          "non functional": 0.7769378314340517
+          "functional": 0.7985411876635218,
+          "functional needs repair": 0.44060081929904416,
+          "non functional": 0.7738547486033519
         },
         "recall_per_class": {
-          "functional": 0.8200557966522009,
-          "functional needs repair": 0.4855156431054461,
-          "non functional": 0.7542168674698795
+          "functional": 0.7805331680099195,
+          "functional needs repair": 0.5608342989571263,
+          "non functional": 0.7585980284775465
         },
-        "recall_needs_repair": 0.4855156431054461,
-        "accuracy": 0.7704545454545455,
-        "roc_auc_macro_ovr": 0.8867334903991843,
+        "recall_needs_repair": 0.5608342989571263,
+        "accuracy": 0.7561447811447811,
+        "roc_auc_macro_ovr": 0.8843561052967011,
         "confusion_matrix": [
           [
-            5291,
-            422,
-            739
+            5036,
+            614,
+            802
           ],
           [
-            328,
-            419,
-            116
+            259,
+            484,
+            120
           ],
           [
-            949,
-            173,
-            3443
+            866,
+            236,
+            3463
           ]
         ],
-        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.81      0.82      0.81      6452\nfunctional needs repair       0.41      0.49      0.45       863\n         non functional       0.80      0.75      0.78      4565\n\n               accuracy                           0.77     11880\n              macro avg       0.67      0.69      0.68     11880\n           weighted avg       0.78      0.77      0.77     11880\n",
-        "latency_ms_per_sample": 0.04029166666686579,
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.82      0.78      0.80      6452\nfunctional needs repair       0.36      0.56      0.44       863\n         non functional       0.79      0.76      0.77      4565\n\n               accuracy                           0.76     11880\n              macro avg       0.66      0.70      0.67     11880\n           weighted avg       0.77      0.76      0.76     11880\n",
+        "latency_ms_per_sample": 0.04639521885539016,
         "n_test": 11880
       }
     },
     "xgboost_smote_threshold": {
       "metrics": {
-        "f1_macro": 0.6295279439926459,
+        "f1_macro": 0.6288677769579619,
         "f1_per_class": {
-          "functional": 0.7598961713173265,
-          "functional needs repair": 0.3936063936063936,
-          "non functional": 0.7350812670542176
+          "functional": 0.7584077985377742,
+          "functional needs repair": 0.39267015706806285,
+          "non functional": 0.7355253752680486
         },
         "recall_per_class": {
-          "functional": 0.7259764414135151,
-          "functional needs repair": 0.6848203939745076,
-          "non functional": 0.6786418400876232
+          "functional": 0.7234965902045877,
+          "functional needs repair": 0.6952491309385863,
+          "non functional": 0.6762322015334064
         },
-        "recall_needs_repair": 0.6848203939745076,
-        "accuracy": 0.7047979797979798,
-        "roc_auc_macro_ovr": 0.870084971037819,
+        "recall_needs_repair": 0.6952491309385863,
+        "accuracy": 0.7032828282828283,
+        "roc_auc_macro_ovr": 0.8694516251657879,
         "confusion_matrix": [
           [
-            4684,
-            1078,
-            690
+            4668,
+            1114,
+            670
           ],
           [
-            196,
-            591,
-            76
+            191,
+            600,
+            72
           ],
           [
-            996,
-            471,
-            3098
+            999,
+            479,
+            3087
           ]
         ],
-        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.80      0.73      0.76      6452\nfunctional needs repair       0.28      0.68      0.39       863\n         non functional       0.80      0.68      0.74      4565\n\n               accuracy                           0.70     11880\n              macro avg       0.63      0.70      0.63     11880\n           weighted avg       0.76      0.70      0.72     11880\n",
-        "latency_ms_per_sample": 0.009809932660218172,
+        "classification_report": "                         precision    recall  f1-score   support\n\n             functional       0.80      0.72      0.76      6452\nfunctional needs repair       0.27      0.70      0.39       863\n         non functional       0.81      0.68      0.74      4565\n\n               accuracy                           0.70     11880\n              macro avg       0.63      0.70      0.63     11880\n           weighted avg       0.76      0.70      0.72     11880\n",
+        "latency_ms_per_sample": 0.028429966331643807,
         "n_test": 11880
       },
-      "threshold": 0.16999999999999996
+      "threshold": 0.15999999999999998
     }
   },
   "champions": {
     "f1_macro": {
       "model": "voting_rf_xgb_soft",
-      "score": 0.6787148532742999
+      "score": 0.6709989185219726
     },
     "recall_needs_repair": {
       "model": "xgboost_smote_threshold",
-      "score": 0.6848203939745076
+      "score": 0.6952491309385863
     },
     "production_dashboard_alerts": "xgboost_smote_threshold",
     "production_analytics_f1": "voting_rf_xgb_soft"
@@ -173,11 +173,11 @@
   "criteria": {
     "f1_macro_target_0_72": {
       "met": false,
-      "best": 0.6787148532742999
+      "best": 0.6709989185219726
     },
     "recall_needs_repair_target_0_65": {
       "met": true,
-      "best": 0.6848203939745076
+      "best": 0.6952491309385863
     }
   },
   "dl_verdict": "DL max F1 ~0.54 (S4) — non retenu pour production",
@@ -186,12 +186,22 @@
     {
       "model": "voting_rf_xgb_soft",
       "type": "ML",
-      "f1_macro": 0.6787148532742999,
-      "f1_needs_repair": 0.44645711241342567,
-      "recall_needs_repair": 0.4855156431054461,
-      "accuracy": 0.7704545454545455,
-      "roc_auc": 0.8867334903991843,
-      "latency_ms": 0.04029166666686579
+      "f1_macro": 0.6709989185219726,
+      "f1_needs_repair": 0.44060081929904416,
+      "recall_needs_repair": 0.5608342989571263,
+      "accuracy": 0.7561447811447811,
+      "roc_auc": 0.8843561052967011,
+      "latency_ms": 0.04639521885539016
+    },
+    {
+      "model": "random_forest_tuned",
+      "type": "ML",
+      "f1_macro": 0.6657959864710662,
+      "f1_needs_repair": 0.4250127097102186,
+      "recall_needs_repair": 0.4843568945538818,
+      "accuracy": 0.7585858585858586,
+      "roc_auc": 0.8723538788564866,
+      "latency_ms": 0.10352618686836416
     },
     {
       "model": "random_forest",
@@ -211,7 +221,7 @@
       "recall_needs_repair": 0.641946697566628,
       "accuracy": 0.7342592592592593,
       "roc_auc": 0.8773769550816316,
-      "latency_ms": 0.017758872053665907
+      "latency_ms": 0.01940296296310934
     },
     {
       "model": "xgboost",
@@ -232,16 +242,6 @@
       "accuracy": 0.7489057239057239,
       "roc_auc": 0.8694516251657879,
       "latency_ms": 0.015903939392557995
-    },
-    {
-      "model": "random_forest_tuned",
-      "type": "ML",
-      "f1_macro": 0.6537055983082088,
-      "f1_needs_repair": 0.37517241379310345,
-      "recall_needs_repair": 0.31517960602549244,
-      "accuracy": 0.7720538720538721,
-      "roc_auc": 0.8720654755041215,
-      "latency_ms": 0.02021056397119145
     },
     {
       "model": "random_forest_smote_recall_boost",
@@ -274,16 +274,6 @@
       "latency_ms": 0.01812182659944143
     },
     {
-      "model": "xgboost_smote_threshold",
-      "type": "ML",
-      "f1_macro": 0.6295279439926459,
-      "f1_needs_repair": 0.3936063936063936,
-      "recall_needs_repair": 0.6848203939745076,
-      "accuracy": 0.7047979797979798,
-      "roc_auc": 0.870084971037819,
-      "latency_ms": 0.009809932660218172
-    },
-    {
       "model": "xgboost_smote_threshold_recall_boost",
       "type": "ML",
       "f1_macro": 0.6288677769579619,
@@ -292,6 +282,16 @@
       "accuracy": 0.7032828282828283,
       "roc_auc": 0.8694516251657879,
       "latency_ms": 0.008875151516721498
+    },
+    {
+      "model": "xgboost_smote_threshold",
+      "type": "ML",
+      "f1_macro": 0.6288677769579619,
+      "f1_needs_repair": 0.39267015706806285,
+      "recall_needs_repair": 0.6952491309385863,
+      "accuracy": 0.7032828282828283,
+      "roc_auc": 0.8694516251657879,
+      "latency_ms": 0.028429966331643807
     },
     {
       "model": "knn",

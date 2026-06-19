@@ -1,0 +1,23 @@
+﻿AUDIT NOTEBOOKS AquaSense_AI
+========================================================================================
+notebooks\00_setup.ipynb                           NON EXECUTE
+notebooks\01_eda.ipynb                             NON EXECUTE
+notebooks\02_wrangling.ipynb                       NON EXECUTE
+notebooks\03_ml_baseline.ipynb                     PARTIEL (1/7 executees)
+notebooks\04_dl_advanced.ipynb                     BROKEN JSON: Expecting value: line 7 column 1 (char 80)
+notebooks\04_dl_mlp.ipynb                          BROKEN JSON: Expecting property name enclosed in double quotes: line 2 column 1 (char 2)
+notebooks\04_dl_mlp_colab_run.ipynb                ERREUR (1 cellule(s))
+    cellule 3: SyntaxError: invalid character '?' (U+26A0) (1710334339.py, line 1)
+notebooks\04_dl_tuning_export.ipynb                NON EXECUTE
+notebooks\05_comparison_final.ipynb                NON EXECUTE
+notebooks\05_dl_colab_tune.ipynb                   NON EXECUTE
+notebooks\05_dl_colab_tune_executed.ipynb          OK (8/8 executees)
+notebooks\06_mqtt_test.ipynb                       NON EXECUTE
+AquaSense_S4_Colab\notebooks\04_dl_advanced.ipynb  NON EXECUTE
+AquaSense_S4_Colab\notebooks\04_dl_mlp.ipynb       NON EXECUTE
+AquaSense_S4_Colab\notebooks\05_dl_colab_tune.ipynb NON EXECUTE
+result\05_dl_colab_tune.ipynb                      OK (8/8 executees)
+result\Untitled5.ipynb                             ERREUR (1 cellule(s))
+    cellule 3: SyntaxError: invalid character '?' (U+26A0) (1710334339.py, line 1)
+========================================================================================
+Total: 17 | OK: 2 | Partiel: 1 | Non execute: 10 | Erreur: 2
