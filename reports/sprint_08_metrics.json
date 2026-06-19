@@ -1,0 +1,50 @@
+{
+  "sprint": 8,
+  "date": "2026-06-19",
+  "status": "completed",
+  "test_framework": "pytest 9.1.0",
+  "summary": {
+    "total_tests": 37,
+    "passed": 37,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate_pct": 100.0,
+    "offline_tests": 35,
+    "integration_tests": 2
+  },
+  "scenarios_validated": {
+    "healthy_sensors": true,
+    "degradation_progressive": true,
+    "failure_instant": true,
+    "fifty_pumps_no_loss": true,
+    "needs_repair_recall_partial": "5/5 alert pumps, >=3 detected in consumer test"
+  },
+  "performance": {
+    "inference_latency_max_ms_offline": 500,
+    "inference_latency_target_ms": 5000,
+    "mqtt_delivery_max_s": 5,
+    "latency_target_met": true
+  },
+  "acceptance_criteria": {
+    "three_simulation_scenarios": true,
+    "fifty_pumps_parallel": true,
+    "mqtt_to_prediction_under_5s": true,
+    "unit_tests_pass_rate_gte_80pct": true,
+    "needs_repair_detection": true
+  },
+  "test_files": [
+    "tests/test_preprocessing.py",
+    "tests/test_mqtt_features.py",
+    "tests/test_simulator.py",
+    "tests/test_mqtt_consumer.py",
+    "tests/test_dashboard_data.py",
+    "tests/test_mqtt_integration.py",
+    "tests/conftest.py"
+  ],
+  "commands": {
+    "offline": "pytest tests/ -m \"not integration\" -v",
+    "integration": "pytest tests/test_mqtt_integration.py -v",
+    "all": "pytest tests/ -v"
+  },
+  "next_sprint": 9
+}

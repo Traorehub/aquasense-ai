@@ -28,7 +28,6 @@ from src.mqtt_config import (
     MQTT_HOST,
     MQTT_PORT,
     MQTT_TOPIC_PREFIX,
-    prediction_topic,
 )
 from src.mqtt_db import MqttDatabase
 from src.mqtt_features import build_feature_row, health_index
@@ -47,11 +46,13 @@ class MqttInferenceConsumer:
         port: int = MQTT_PORT,
         buffer_size: int = BUFFER_SIZE,
         db_path: str | None = None,
+        topic_prefix: str | None = None,
     ):
         self.host = host
         self.port = port
         self.buffer_size = buffer_size
         self.model_path = model_path or str(MODEL_PATH)
+        self.topic_prefix = topic_prefix or MQTT_TOPIC_PREFIX
         self.model = joblib.load(self.model_path)
         self.profiles = ensure_pump_profiles()
         self.buffers: dict[str, deque] = defaultdict(lambda: deque(maxlen=buffer_size))
@@ -75,7 +76,7 @@ class MqttInferenceConsumer:
         if reason_code.is_failure:
             print(f"Échec connexion MQTT : {reason_code}")
             return
-        topic = f"{MQTT_TOPIC_PREFIX}/+/telemetry"
+        topic = f"{self.topic_prefix}/+/telemetry"
         client.subscribe(topic, qos=0)
         print(f"Consumer connecté — subscribe {topic}")
         print(f"  Modèle : {self.model_path}")
@@ -125,7 +126,9 @@ class MqttInferenceConsumer:
             "scenario": payload.get("scenario"),
         }
 
-        client.publish(prediction_topic(pump_id), json.dumps(result), qos=0)
+        client.publish(
+            f"{self.topic_prefix}/{pump_id}/prediction", json.dumps(result), qos=0
+        )
         self.db.insert_prediction(
             pump_id=pump_id,
             prediction=str(prediction),

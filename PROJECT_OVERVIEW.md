@@ -93,7 +93,7 @@ AquaSense_AI/
 | **S5** | Comparaison finale | 2j | ✅ Terminé | Voting F1=0.679 ; recall champ 0.685 ; `model_card.md` |
 | **S6** | Simulation IoT MQTT | 2j | ✅ Terminé | Mosquitto Windows + simulator + consumer + SQLite |
 | **S7** | Dashboard Streamlit (vue Maroc) | 2–3j | ✅ Terminé | `dashboard/app.py` — KPIs, carte, alertes, auto-refresh |
-| **S8** | Tests simulation | 2j | ⬜ À faire | pytest, scénarios E2E |
+| **S8** | Tests simulation | 2j | ✅ Terminé | pytest 37/37 — offline + intégration MQTT |
 | **S9** | Rapport & Livrables | 1–2j | ⬜ À faire | PDF, section choix dataset Maroc |
 
 **Légende :** ⬜ À faire · 🟡 En cours · ✅ Terminé (S3 : recall métier ✅, F1 cible 0.72 reporté au S4/S5)
