@@ -2,7 +2,7 @@
 
 > **Fichier de référence central** — Retourne ici à chaque session pour reprendre le fil.
 > **Équipe :** TRAORE Fanogo Mohamed · NADAHE Mohamed · **EHTP MIG S4**
-> **Dernière mise à jour :** 2026-06-17
+> **Dernière mise à jour :** 2026-06-19
 
 ---
 
@@ -88,15 +88,15 @@ AquaSense_AI/
 | **S0** | Setup & Environnement | 1j | ✅ Terminé | structure, requirements, dataset, 00_setup.ipynb |
 | **S1** | Acquisition & EDA | 2–3j | ✅ Terminé | 01_eda.ipynb, 8+ graphiques, cadrage Maroc |
 | **S2** | Wrangling & Feature Engineering | 3j | ✅ Terminé | preprocessing.py, train_clean.csv |
-| **S3** | Baseline ML | 3–4j | ⬜ À faire | LR, KNN, RF, XGBoost, F1 ≥ 0.72 |
-| **S4** | Deep Learning | 3–4j | ⬜ À faire | MLP, ResidualMLP/1D-CNN, .keras + .tflite |
-| **S5** | Comparaison finale | 2j | ⬜ À faire | Tableau comparatif, model_card.md |
-| **S6** | Simulation IoT Mosquitto | 2j | ⬜ À faire | simulator.py, mqtt_consumer.py |
+| **S3** | Baseline ML | 3–4j | ✅ Terminé | LR, KNN, RF, XGBoost, GridSearch, recall boost |
+| **S4** | Deep Learning | 3–4j | ✅ Terminé | 6 archi DL Colab ; F1 max 0.54 — ML reste champion → S5 |
+| **S5** | Comparaison finale | 2j | ✅ Terminé | Voting F1=0.679 ; recall champ 0.685 ; `model_card.md` |
+| **S6** | Simulation IoT MQTT | 2j | ✅ Terminé | Mosquitto Windows + simulator + consumer + SQLite |
 | **S7** | Dashboard Streamlit (vue Maroc) | 2–3j | ⬜ À faire | dashboard/app.py |
 | **S8** | Tests simulation | 2j | ⬜ À faire | pytest, scénarios E2E |
 | **S9** | Rapport & Livrables | 1–2j | ⬜ À faire | PDF, section choix dataset Maroc |
 
-**Légende :** ⬜ À faire · 🟡 En cours · ✅ Terminé
+**Légende :** ⬜ À faire · 🟡 En cours · ✅ Terminé (S3 : recall métier ✅, F1 cible 0.72 reporté au S4/S5)
 
 ---
 
@@ -150,7 +150,13 @@ python scripts/download_data.py
 jupyter notebook notebooks/00_setup.ipynb
 python src/preprocessing.py
 pytest tests/ -v
-python src/train.py                    # S3
+python -m src.train                    # S3 baselines
+python -m src.train recall             # S3 recall boost (SMOTE + seuil)
+python -m src.train_dl                 # S4 DL (MLP + Residual + CNN)
+python -m src.train_dl tune            # S4 + grid search + TFLite
+python -m src.train final              # S5 arbitrage + voting RF+XGB
+py -3.10 -m src.mqtt_consumer           # S6 consumer inférence MQTT
+py -3.10 -m src.simulator                # S6 simulateur 50 pompes
 streamlit run dashboard/app.py         # S7
 ```
 
@@ -198,6 +204,90 @@ streamlit run dashboard/app.py         # S7
 
 ---
 
+### 📅 2026-06-17 — Session 5 : Sprint 3 (Baseline ML)
+
+**Actions :** `src/train.py` (4 baselines + GridSearch RF/XGB), `XGBStringLabelPipeline`, notebook `03_ml_baseline.ipynb`, modèles joblib, métriques JSON/CSV, rapport S3.
+
+**Résultats :**
+- Champion F1-Macro : **RF tuned** (0.6658) — cible 0.72 non atteinte
+- Meilleur recall needs repair : **XGB tuned** (0.6419) — cible 0.65 quasi atteinte
+- Livrables techniques : ✅ · Objectifs métriques : partiels
+
+**Prochaine étape :** Sprint 4 — Deep Learning.
+
+---
+
+### 📅 2026-06-17 — Session 6 : Recall boost (SMOTE + seuil)
+
+**Commande :** `python -m src.train recall`
+
+**Résultat :** recall needs repair **0.6952** ✅ (cible 0.65) avec `xgboost_smote_threshold` (seuil 0.16).  
+F1-Macro recall champion : 0.6289 — compromis recall / précision attendu.
+
+**Modèles :** `champion_recall_v1.joblib`, `xgb_smote_threshold_v1.joblib`
+
+**Prochaine étape :** Sprint 4 — Deep Learning (Colab GPU **optionnel**, pas obligatoire).
+
+---
+
+### 📅 2026-06-19 — Session 7 : Notebook S3 + rapport final
+
+**Actions :** notebook `03_ml_baseline.ipynb` exécuté (comparatif, confusion matrices, feature importance, critères §6). Rapport `sprint_03_ml_report.md` complété (captures terminal, PNG notebook, recall boost).
+
+**Confirmé :** entraînements S3 **terminés** en local CPU — modèles `.joblib` + PNG sur disque. Pas besoin de Colab pour S3.
+
+**Prochaine étape :** Sprint 4 DL — local ou Colab si tuning long.
+
+---
+
+### 📅 2026-06-19 — Session 8 : MLP Colab (S4)
+
+**Actions :** exécution `04_dl_mlp.ipynb` sur Colab (GPU T4). Résultats intégrés : `models/mlp_best_v1.keras`, `notebooks/04_dl_mlp_colab_run.ipynb`, rapport **`reports/sprint_04_dl_report.md`** + PNG + JSON.
+
+**Métriques test (MLP baseline) :** F1-Macro **0.5297**, Recall needs repair **0.6037**, Accuracy **0.5950** — sous les baselines ML (RF F1 0.67, XGB recall 0.70). Verdict : sprint S4 en cours, projet globalement sain.
+
+**Prochaine étape :** `python -m src.train_dl tune` sur Colab.
+
+---
+
+### 📅 2026-06-19 — Session 9 : Tuning DL Colab (fin S4)
+
+**Actions :** `05_dl_colab_tune.ipynb` exécuté — `python -m src.train_dl tune` (MLP + Residual + CNN + grid 9 configs).
+
+**Résultats :** meilleur DL **mlp_l2_0.001** F1=**0.5410** ; champion script **mlp_baseline** 0.5297. Toujours **sous ML** (RF 0.67, XGB recall 0.70). Rapport `sprint_04_dl_report.md` finalisé.
+
+**Verdict S4 :** DL ne bat pas le ML sur Pump It Up — **champion = ML** pour S5.
+
+**Prochaine étape :** Sprint 5 — Voting RF+XGB, `model_card.md`.
+
+---
+
+### 📅 2026-06-19 — Session 10 : Sprint 5 terminé
+
+**Actions :** `python -m src.train final` — Soft Voting RF+XGB, recall champion, tableau ML+DL.
+
+**Résultats :** F1 champion **voting_rf_xgb_soft = 0.6787** (+0.02 vs XGB seul). Recall métier **0.6848** (XGB SMOTE+seuil). DL exclu prod.
+
+**Livrables :** `model_card.md`, `sprint_05_arbitration_report.md`, `voting_rf_xgb_v1.joblib`, `champion_production_v1.joblib`.
+
+**Prochaine étape :** Sprint 6 — simulation MQTT + inférence temps réel.
+
+---
+
+### 📅 2026-06-19 — Session 11 : Sprint 6 terminé
+
+**Actions :** pipeline MQTT 100 % Windows — Mosquitto local, `simulator.py`, `mqtt_consumer.py`, SQLite, profils 50 pompes.
+
+**Architecture :** broker `127.0.0.1:1883` · topics `aquasense/{id}/telemetry|prediction` · modèle `champion_production_v1.joblib`.
+
+**Résultats test 50 pompes :** latence **22–70 ms** · 5 alertes `needs repair` · persistance `data/mqtt/aquasense.db`.
+
+**Livrables :** `reports/sprint_06_mqtt_report.md`, `sprint_06_metrics.json`, `.env.example`, `scripts/test_mqtt_e2e.py`.
+
+**Prochaine étape :** Sprint 7 — dashboard Streamlit Maroc.
+
+---
+
 ## 8. Décisions techniques prises
 
 | Date | Décision | Raison |
@@ -207,7 +297,11 @@ streamlit run dashboard/app.py         # S7
 | 2026-06-17 | `PumpPreprocessor` fit/transform | Évite data leakage |
 | 2026-06-17 | Pump It Up conservé | Pas de dataset Maroc ouvert équivalent |
 | 2026-06-17 | Problème = Maroc · données = proxy Tanzanie | Même paradigme ML, cadrage local |
-| 2026-06-17 | S0–S2 non refaits | Pipeline et features universellement valides |
+| 2026-06-17 | `sample_weight` balanced pour XGBoost | Classe minoritaire needs repair (~7 %) |
+| 2026-06-17 | `XGBStringLabelPipeline` | XGBoost 3.x + labels string + sample_weight |
+| 2026-06-17 | Champion recall = XGB SMOTE+seuil (0.70) | Recall needs repair ≥ 0.65 atteint ; F1 recall champion 0.63 |
+| 2026-06-19 | MQTT 100 % Windows local (pas VM/Cloudflared) | Reproductible en TP ; Mosquitto winget + port 1883 |
+| 2026-06-19 | Profils ML + télémétrie simulée (hybride) | Modèle tabulaire S5 ; capteurs pour démo IoT + health_index |
 
 ---
 
