@@ -1,0 +1,78 @@
+{
+  "sprint": 6,
+  "date": "2026-06-19",
+  "status": "completed",
+  "architecture": "100% Windows local (Mosquitto + Python)",
+  "broker": {
+    "host": "127.0.0.1",
+    "port": 1883,
+    "tls": false,
+    "auth": false
+  },
+  "model": {
+    "file": "models/champion_production_v1.joblib",
+    "type": "XGBoost SMOTE + threshold calibrated",
+    "threshold": 0.17
+  },
+  "simulation": {
+    "num_pumps": 50,
+    "publish_interval_s": 5,
+    "scenarios": {
+      "healthy": 31,
+      "degradation": 12,
+      "failure": 7
+    },
+    "month": 6,
+    "dry_season_active": true,
+    "dry_flow_factor": 0.85
+  },
+  "inference": {
+    "buffer_size": 30,
+    "latency_ms_min": 21.1,
+    "latency_ms_max": 70.7,
+    "latency_ms_typical": 27,
+    "latency_target_ms": 5000,
+    "latency_target_met": true
+  },
+  "first_cycle_predictions": {
+    "functional": 24,
+    "functional needs repair": 5,
+    "non functional": 21,
+    "needs_repair_pumps": [
+      "pump_011",
+      "pump_021",
+      "pump_027",
+      "pump_029",
+      "pump_043"
+    ]
+  },
+  "failure_pumps_health_zero": [
+    "pump_002",
+    "pump_008",
+    "pump_016",
+    "pump_018",
+    "pump_041"
+  ],
+  "acceptance_criteria": {
+    "broker_operational": true,
+    "simulator_50_pumps_3_scenarios": true,
+    "consumer_inference_publish": true,
+    "latency_under_5s": true,
+    "sqlite_persistence": true,
+    "e2e_documented": true
+  },
+  "artifacts": [
+    "src/simulator.py",
+    "src/mqtt_consumer.py",
+    "src/mqtt_config.py",
+    "src/pump_registry.py",
+    "src/mqtt_features.py",
+    "src/mqtt_db.py",
+    "data/simulated/pump_profiles.json",
+    "data/mqtt/aquasense.db",
+    ".env.example",
+    "scripts/test_mqtt_e2e.py",
+    "reports/sprint_06_mqtt_report.md"
+  ],
+  "next_sprint": 7
+}
