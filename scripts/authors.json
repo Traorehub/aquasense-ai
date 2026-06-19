@@ -1,0 +1,14 @@
+{
+  "mohamed": {
+    "name": "NADAHE Mohammed",
+    "email": "nadahemohammed81@gmail.com",
+    "github": "nadahemed",
+    "note": "Doit être vérifié sur github.com/nadahemed → Settings → Emails"
+  },
+  "fanogo": {
+    "name": "TRAORE Fanogo Mohamed",
+    "email": "molchabitedemi@gmail.com",
+    "github": "Traorehub",
+    "note": "Email déjà utilisé dans l'historique Git actuel — vérifier qu'il est lié au compte Traorehub"
+  }
+}

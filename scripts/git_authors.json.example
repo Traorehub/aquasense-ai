@@ -1,0 +1,11 @@
+{
+  "_comment": "Copier vers git_authors.json et remplir les emails GitHub de chaque membre.",
+  "mohamed": {
+    "name": "NADAHE Mohamed",
+    "email": "VOTRE_EMAIL_GITHUB_MOHAMED@users.noreply.github.com"
+  },
+  "fanogo": {
+    "name": "TRAORE Fanogo Mohamed",
+    "email": "EMAIL_GITHUB_FANOGO@users.noreply.github.com"
+  }
+}

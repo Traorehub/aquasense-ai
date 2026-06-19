@@ -111,6 +111,44 @@ class MqttDatabase:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def latest_predictions_by_pump(self) -> list[dict[str, Any]]:
+        """Dernière prédiction connue pour chaque pompe."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT p.pump_id, p.timestamp, p.prediction, p.confidence,
+                       p.health_index, p.proba_json, p.latency_ms
+                FROM predictions p
+                INNER JOIN (
+                    SELECT pump_id, MAX(id) AS max_id
+                    FROM predictions
+                    GROUP BY pump_id
+                ) latest ON p.id = latest.max_id
+                ORDER BY p.pump_id
+                """
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def telemetry_history(self, pump_id: str, limit: int = 100) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT pump_id, timestamp, pressure, vibration, flow, scenario, month, sim_day
+                FROM telemetry
+                WHERE pump_id = ?
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+                (pump_id, limit),
+            ).fetchall()
+        return [dict(r) for r in reversed(rows)]
+
+    def count_rows(self) -> dict[str, int]:
+        with self._connect() as conn:
+            t = conn.execute("SELECT COUNT(*) FROM telemetry").fetchone()[0]
+            p = conn.execute("SELECT COUNT(*) FROM predictions").fetchone()[0]
+        return {"telemetry": t, "predictions": p}
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()

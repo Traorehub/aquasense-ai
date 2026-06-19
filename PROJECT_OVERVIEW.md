@@ -92,7 +92,7 @@ AquaSense_AI/
 | **S4** | Deep Learning | 3–4j | ✅ Terminé | 6 archi DL Colab ; F1 max 0.54 — ML reste champion → S5 |
 | **S5** | Comparaison finale | 2j | ✅ Terminé | Voting F1=0.679 ; recall champ 0.685 ; `model_card.md` |
 | **S6** | Simulation IoT MQTT | 2j | ✅ Terminé | Mosquitto Windows + simulator + consumer + SQLite |
-| **S7** | Dashboard Streamlit (vue Maroc) | 2–3j | ⬜ À faire | dashboard/app.py |
+| **S7** | Dashboard Streamlit (vue Maroc) | 2–3j | ✅ Terminé | `dashboard/app.py` — KPIs, carte, alertes, auto-refresh |
 | **S8** | Tests simulation | 2j | ⬜ À faire | pytest, scénarios E2E |
 | **S9** | Rapport & Livrables | 1–2j | ⬜ À faire | PDF, section choix dataset Maroc |
 
@@ -285,6 +285,16 @@ F1-Macro recall champion : 0.6289 — compromis recall / précision attendu.
 **Livrables :** `reports/sprint_06_mqtt_report.md`, `sprint_06_metrics.json`, `.env.example`, `scripts/test_mqtt_e2e.py`.
 
 **Prochaine étape :** Sprint 7 — dashboard Streamlit Maroc.
+
+---
+
+### 📅 2026-06-19 — Session 12 : Sprint 7 terminé
+
+**Actions :** `dashboard/app.py` + `dashboard/data.py` — KPIs, carte Plotly, alertes, détail pompe, comparaison modèles, auto-refresh 10 s SQLite.
+
+**Commande :** `streamlit run dashboard/app.py`
+
+**Prochaine étape :** Sprint 8 — tests simulation E2E.
 
 ---
 

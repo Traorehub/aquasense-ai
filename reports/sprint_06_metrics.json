@@ -53,7 +53,10 @@
     "pump_018",
     "pump_041"
   ],
-  "acceptance_criteria": {
+  "test_screenshots": [
+    "reports/image/Capture d'écran 2026-06-19 121202.png",
+    "reports/image/Capture d'écran 2026-06-19 121255.png"
+  ],
     "broker_operational": true,
     "simulator_50_pumps_3_scenarios": true,
     "consumer_inference_publish": true,

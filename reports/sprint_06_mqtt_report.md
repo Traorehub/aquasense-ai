@@ -316,7 +316,23 @@ Le consumer applique donc une stratégie **hybride** documentée :
 
 ## 7. Résultats du test 50 pompes (19/06/2026)
 
-Exécution locale validée par l'équipe :
+Exécution locale validée par l'équipe — **2 terminaux PowerShell** (consumer + simulateur).
+
+### Captures terminal
+
+**Terminal 1 — `py -3.10 -m src.mqtt_consumer`**
+
+![Consumer MQTT connecté et inférence temps réel](image/Capture%20d'%C3%A9cran%202026-06-19%20121202.png)
+
+*Connexion `127.0.0.1:1883`, modèle `champion_production_v1.joblib`, 50 profils, SQLite actif. Prédictions affichées en ~24–48 ms (`buf=1`).*
+
+**Terminal 2 — `py -3.10 -m src.simulator`**
+
+![Simulateur 50 pompes et scénarios MQTT](image/Capture%20d'%C3%A9cran%202026-06-19%20121255.png)
+
+*50 pompes → `127.0.0.1:1883` · scénarios 31 healthy / 12 degradation / 7 failure · mois=6 · intervalle 5 s.*
+
+### Synthèse métriques
 
 | Métrique | Valeur |
 |----------|--------|
